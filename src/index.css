@@ -1,0 +1,16 @@
+:root {
+  --color-1: gray;
+  --color-2: rgb(255, 255, 255);
+  --color-3: rgb(213, 206, 220);
+  --color-4: rgb(77, 77, 77);
+  --color-5: white;
+  --color-6: white;
+  --color-7: white;
+  --color-8: white;
+
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+  margin: 0;
+}

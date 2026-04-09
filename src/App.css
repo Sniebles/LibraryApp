@@ -1,0 +1,13 @@
+.options {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  gap: 1rem;
+  color: var(--color-4);
+}
+
+.book_title {
+  position: absolute;
+  top: 0;
+}
