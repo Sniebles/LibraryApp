@@ -1,8 +1,11 @@
 import { useState } from 'react'
 import './Box.css'
 
-function Box({ children, width, height, className, Selectable = false, onClick}) {
+function Box({ children, width, height, className = '', Selectable = false, onClick}) {
   const [mousePos, setMousePos] = useState({ x: '50%', y: '50%' })
+  const boxClassName = ['box', className, Selectable ? '' : 'non-selectable'].filter(Boolean).join(' ')
+  const computedWidth = width || '100%'
+  const computedHeight = height || '100%'
 
   const handleMouseMove = (event) => {
     const rect = event.currentTarget.getBoundingClientRect()
@@ -13,11 +16,13 @@ function Box({ children, width, height, className, Selectable = false, onClick})
 
   return (
     <div
-      onClick={(onClick)}
-      className={`box ${className + (Selectable ? "" : " non-selectable") || ''}`.trim()}
+      onClick={onClick}
+      className={boxClassName}
       style={{
-        '--mouse-x': mousePos.x, '--mouse-y': mousePos.y,
-        '--width': width, '--height': height
+        '--mouse-x': mousePos.x,
+        '--mouse-y': mousePos.y,
+        '--width': computedWidth,
+        '--height': computedHeight
        }}
       onMouseMove={handleMouseMove}
     >

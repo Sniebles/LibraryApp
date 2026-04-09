@@ -1,8 +1,12 @@
+import { useState } from 'react';
+import Book from './Book';
 import './Books.css'
 import Box from './Box'
 import Panel from './Panel'
+import Section from './Section';
 
 function Books({setPanel}) {
+    const [book, setBook] = useState(0)
     const books = [
     {
         ISBN: "978-0131103627",
@@ -87,19 +91,26 @@ function Books({setPanel}) {
     }
     ];
     return (
-        <Panel setPanel={setPanel}>
-            <div className='books_content'>
-                {books.map((book, index) => (
-                    <Box key={index} className="book">
-                        <div>
-                            <h1>{book.title}</h1>
-                            <p>{book.ISBN}</p>
-                            <p>{book.authors.join(", ")}</p>
-                        </div>
-                    </Box>
-                ))}
-            </div>
-        </Panel>
+        <>
+            <Panel setPanel={setPanel}>
+                <div className='books_content'>
+                    {books.map((book, index) => (
+                        <Box onClick={() => setBook(index + 1)} key={index} className="book">
+                            <div>
+                                <h1>{book.title}</h1>
+                                <p>{book.ISBN}</p>
+                                <p>{book.authors.join(", ")}</p>
+                            </div>
+                        </Box>
+                    ))}
+                </div>
+            </Panel>
+            {
+                books.map((_book, index) => (
+                    book == index + 1 ? <Book setBook={setBook} /> : null
+                ))
+            }
+        </>
     )
 }
 

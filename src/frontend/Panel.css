@@ -1,8 +1,18 @@
-.panel {
-    position: absolute;
-    background-color: rgba(107, 107, 107, 0.475);
+.panel_ovelay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    animation: ovelayEnter 0.3s ease forwards;
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
+}
+
+.panel {
+    position: absolute;
+    background-color: rgba(255, 255, 255, 0.475);
     inset: 5rem;
     top: 2rem;
     bottom: 2rem;
@@ -10,6 +20,8 @@
     border-radius: 2.5rem;
     overflow: hidden;
     animation: panelEnter 0.3s ease forwards;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
 }
 .panel_exit_div {
     position: absolute;
@@ -55,5 +67,14 @@
     to {
         opacity: 1;
         transform: scale(1) translateY(0);
+    }
+}
+
+@keyframes ovelayEnter {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
     }
 }

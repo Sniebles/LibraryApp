@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import './UserReg.css'
+import Panel from './Panel'
 
 function UserReg({ setPanel }) {
   const [formData, setFormData] = useState({
@@ -22,11 +23,7 @@ function UserReg({ setPanel }) {
   }
 
   return (
-    <div className='userreg_overlay'>
-      <div className='userreg_modal'>
-        <button className='userreg_close' onClick={() => setPanel(0)}>
-          ×
-        </button>
+    <Panel setPanel={setPanel} className='userreg_panel'>
         <h2>Registro de usuario</h2>
         <form className='userreg_form' onSubmit={handleSubmit}>
           <label>
@@ -84,8 +81,7 @@ function UserReg({ setPanel }) {
             Registrarse
           </button>
         </form>
-      </div>
-    </div>
+    </Panel>
   )
 }
 

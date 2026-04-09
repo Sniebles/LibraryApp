@@ -21,12 +21,11 @@
     position: absolute;
     top: var(--mouse-y);
     left: var(--mouse-x);
-    width: calc(min(var(--width), var(--height))*5);
-    height: calc(min(var(--width), var(--height))*5);
+    width: calc(min(var(--width, 100%), var(--height, 100%)) * 5);
+    height: calc(min(var(--width, 100%), var(--height, 100%)) * 5);
     transform: translate(-50%, -50%);
     pointer-events: none;
-    background: radial-gradient(circle at center, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0.2) 30%, transparent 65%);
-    filter: blur(12px);
+    background: radial-gradient(circle at center, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0) 30%, transparent 65%);
     opacity: 0;
     transition: opacity 0.2s ease;
     z-index: 0;
