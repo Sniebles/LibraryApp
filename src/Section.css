@@ -4,20 +4,28 @@
 .section_box:hover .section_img {
     filter: blur(10px);
 }
-.book_title_div {
+.book_title_background {
     position: absolute;
-    z-index: 10;
     background-color: var(--color-2);
     width: 100%;
     display: flex;
     justify-content: center;
     align-items: center;
     height: 10rem;
-    bottom: 0;
     box-shadow: 0 0 10rem #ffffff, 0 0 30px #ffffff1a;
+    transition: all 0.3s ease;
+    top: 0;
 }
 
-.book_title_div::before {
+.section_box:hover .book_title_background {
+    top: -20rem;
+}
+.section_box:hover .book_title_div {
+    height: 100%;
+    color: #ffffff;
+}
+
+.book_title_background::before {
     content: '';
     position: absolute;
     top: 0;
@@ -27,9 +35,10 @@
     background-color: var(--color-2);
     filter: blur(3px);
     z-index: -1;
+    transition: all 0.3s ease;
 }
 
-.book_title_div::after {
+.book_title_background::after {
     content: '';
     position: absolute;
     top: -2px;
@@ -39,6 +48,18 @@
     border: 9rem solid var(--color-2);
     filter: blur(3rem);
     z-index: -1;
+    height: 0;
+    transition: all 0.3s ease;
+}
+
+.book_title_div {
+    position: absolute;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 12rem;
+    transition: all 0.3s ease;
+    color: var(--color-4);
 }
 
 .book_title {

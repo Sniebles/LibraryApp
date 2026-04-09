@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import './Box.css'
 
-function Box({ children, width, height, className }) {
+function Box({ children, width, height, className, Selectable = false, onClick}) {
   const [mousePos, setMousePos] = useState({ x: '50%', y: '50%' })
 
   const handleMouseMove = (event) => {
@@ -13,7 +13,8 @@ function Box({ children, width, height, className }) {
 
   return (
     <div
-      className={`box ${className || ''}`.trim()}
+      onClick={(onClick)}
+      className={`box ${className + (Selectable ? "" : " non-selectable") || ''}`.trim()}
       style={{
         '--mouse-x': mousePos.x, '--mouse-y': mousePos.y,
         '--width': width, '--height': height

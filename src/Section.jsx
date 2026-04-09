@@ -1,10 +1,11 @@
 import './Section.css'
 import Box from './Box'
 
-function Section({img, text}) {
+function Section({img, text, onClick}) {
   return (
-    <Box className="section_box" width="25em" height="30rem">
+    <Box onClick={onClick} className="section_box" width="25em" height="30rem">
         <img className='section_img' src={img} />
+        <div className='book_title_background' />
         <div className='book_title_div'>
             <h1 className='book_title'>{text}</h1>
         </div>
