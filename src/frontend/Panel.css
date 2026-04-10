@@ -23,6 +23,30 @@
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
 }
+
+.panel_content {
+    height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.panel_content::-webkit-scrollbar {
+    width: 12px;
+}
+
+.panel_content::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.panel_content::-webkit-scrollbar-thumb {
+    background: var(--color-1);
+    border-radius: 6px;
+    transition: background 0.3s ease;
+}
+
+.panel_content::-webkit-scrollbar-thumb:hover {
+    background: var(--color-3);
+}
 .panel_exit_div {
     position: absolute;
     display: flex;
@@ -42,6 +66,7 @@
     border-radius: 50%;
     border: 0.2rem solid var(--color-1);
     transition: all 0.3s ease;
+    z-index: 2;
 }
 
 .panel_exit_b:hover {

@@ -1,105 +1,101 @@
-import { useState } from 'react';
+import { useEffect, useState } from "react";
 import Book from './Book';
 import './Books.css'
 import Box from './Box'
 import Panel from './Panel'
-import Section from './Section';
 
 function Books({setPanel}) {
     const [book, setBook] = useState(0)
-    const books = [
-    {
-        ISBN: "978-0131103627",
-        title: "The C Programming Language",
-        authors: ["Brian W. Kernighan", "Dennis M. Ritchie"],
-        publisher: "Prentice Hall",
-        year: 1988,
-        categories: ["Programming", "Computer Science"],
-        description: "A classic book that introduces the C programming language and its core concepts."
-    },
-    {
-        ISBN: "978-0201633610",
-        title: "Design Patterns: Elements of Reusable Object-Oriented Software",
-        authors: ["Erich Gamma", "Richard Helm", "Ralph Johnson", "John Vlissides"],
-        publisher: "Addison-Wesley",
-        year: 1994,
-        categories: ["Software Engineering", "Design Patterns"],
-        description: "A foundational book describing common solutions to recurring software design problems."
-    },
-    {
-        ISBN: "978-0132350884",
-        title: "Clean Code: A Handbook of Agile Software Craftsmanship",
-        authors: ["Robert C. Martin"],
-        publisher: "Prentice Hall",
-        year: 2008,
-        categories: ["Software Engineering", "Best Practices"],
-        description: "A guide to writing readable, maintainable, and efficient code."
-    },
-    {
-        ISBN: "978-0131103627",
-        title: "The C Programming Language",
-        authors: ["Brian W. Kernighan", "Dennis M. Ritchie"],
-        publisher: "Prentice Hall",
-        year: 1988,
-        categories: ["Programming", "Computer Science"],
-        description: "A classic book that introduces the C programming language and its core concepts."
-    },
-    {
-        ISBN: "978-0201633610",
-        title: "Design Patterns: Elements of Reusable Object-Oriented Software",
-        authors: ["Erich Gamma", "Richard Helm", "Ralph Johnson", "John Vlissides"],
-        publisher: "Addison-Wesley",
-        year: 1994,
-        categories: ["Software Engineering", "Design Patterns"],
-        description: "A foundational book describing common solutions to recurring software design problems."
-    },
-    {
-        ISBN: "978-0132350884",
-        title: "Clean Code: A Handbook of Agile Software Craftsmanship",
-        authors: ["Robert C. Martin"],
-        publisher: "Prentice Hall",
-        year: 2008,
-        categories: ["Software Engineering", "Best Practices"],
-        description: "A guide to writing readable, maintainable, and efficient code."
-    },
-    {
-        ISBN: "978-0131103627",
-        title: "The C Programming Language",
-        authors: ["Brian W. Kernighan", "Dennis M. Ritchie"],
-        publisher: "Prentice Hall",
-        year: 1988,
-        categories: ["Programming", "Computer Science"],
-        description: "A classic book that introduces the C programming language and its core concepts."
-    },
-    {
-        ISBN: "978-0201633610",
-        title: "Design Patterns: Elements of Reusable Object-Oriented Software",
-        authors: ["Erich Gamma", "Richard Helm", "Ralph Johnson", "John Vlissides"],
-        publisher: "Addison-Wesley",
-        year: 1994,
-        categories: ["Software Engineering", "Design Patterns"],
-        description: "A foundational book describing common solutions to recurring software design problems."
-    },
-    {
-        ISBN: "978-0132350884",
-        title: "Clean Code: A Handbook of Agile Software Craftsmanship",
-        authors: ["Robert C. Martin"],
-        publisher: "Prentice Hall",
-        year: 2008,
-        categories: ["Software Engineering", "Best Practices"],
-        description: "A guide to writing readable, maintainable, and efficient code."
-    }
-    ];
+    const [books, setBooks] = useState([]);
+
+    const [filter, setFilter] = useState("title");
+    const [search, setSearch] = useState("");
+    const [searchInput, setSearchInput] = useState("");
+    
+    useEffect(() => {
+        const fetchBooks = async () => {
+            try {
+                let url = "http://localhost:3001/books";
+                if (search.trim() !== "") {
+                    switch (filter) {
+                        case "title":
+                            url = `http://localhost:3001/books/title/${encodeURIComponent(search)}`;
+                            break;
+                        case "author":
+                            url = `http://localhost:3001/books/author/${encodeURIComponent(search)}`;
+                            break;
+                        case "ISBN":
+                            url = `http://localhost:3001/books/isbn/${encodeURIComponent(search)}`;
+                            break;
+                        case "category":
+                            url = `http://localhost:3001/books/category/${encodeURIComponent(search)}`;
+                            break;
+                        case "available":
+                            url = `http://localhost:3001/books/disponivility/${encodeURIComponent(true)}`;
+                            break;
+                        default:
+                            break;
+                    }
+                }
+                const res = await fetch(url);
+                if (!res.ok) {
+                    throw new Error(`HTTP error! status: ${res.status}`);
+                }
+                const data = await res.json();
+                setBooks(data);
+            } catch (error) {
+                console.error("Error fetching books:", error);
+                setBooks([]); // or keep previous books
+            }
+        };
+
+        fetchBooks();
+    }, [search, filter]);
     return (
         <>
-            <Panel setPanel={setPanel}>
+            <Panel type={0} setPanel={setPanel}>
+                <div className="books_topbar">
+                    <div className="search_input_wrapper">
+                        <label htmlFor="bookSearch">Buscar</label>
+                        <input
+                            id="bookSearch"
+                            type="text"
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            placeholder="Buscar por término..."
+                        />
+                    </div>
+                    <div className="search_options">
+                        {[
+                            {value: "title", label: "title"},
+                            {value: "author", label: "author"},
+                            {value: "ISBN", label: "ISBN"},
+                            {value: "category", label: "category"},
+                            {value: "available", label: "available"}
+                        ].map((option) => (
+                            <label className="search_option" key={option.value}>
+                                <input
+                                    type="radio"
+                                    name="searchField"
+                                    value={option.value}
+                                    checked={filter === option.value}
+                                    onChange={() => setFilter(option.value)}
+                                />
+                                <span>{option.label}</span>
+                            </label>
+                        ))}
+                    </div>
+                </div>
                 <div className='books_content'>
                     {books.map((book, index) => (
                         <Box onClick={() => setBook(index + 1)} key={index} className="book">
                             <div>
-                                <h1>{book.title}</h1>
-                                <p>{book.ISBN}</p>
-                                <p>{book.authors.join(", ")}</p>
+                                <h1>{book.titulo}</h1>
+                                <p>{book.isbn}</p>
+                                <p>{book.descripcion}</p>
+                                <p>{book.autores}</p>
+                                <p>{book.categorias}</p>
+                                <p>{book.disponibilidad}</p>
                             </div>
                         </Box>
                     ))}
@@ -107,7 +103,18 @@ function Books({setPanel}) {
             </Panel>
             {
                 books.map((_book, index) => (
-                    book == index + 1 ? <Book setBook={setBook} /> : null
+                    book == index + 1 ? <Book
+                    key={index}
+                    title={_book.titulo}
+                    isbn={_book.isbn}
+                    editorial={_book.editorial}
+                    year={_book.anio}
+                    description={_book.descripcion}
+                    id_book={_book.id_libro}
+                    autores={_book.autores}
+                    categorias={_book.categorias}
+                    disponibilidad={_book.disponibilidad}
+                    setBook={setBook} /> : null
                 ))
             }
         </>
