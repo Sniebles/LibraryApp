@@ -4,7 +4,7 @@ import './Books.css'
 import Box from './Box'
 import Panel from './Panel'
 
-function Books({setPanel}) {
+function Books({setPanel, user}) {
     const [book, setBook] = useState(0)
     const [books, setBooks] = useState([]);
 
@@ -67,11 +67,11 @@ function Books({setPanel}) {
                     </div>
                     <div className="search_options">
                         {[
-                            {value: "title", label: "title"},
-                            {value: "author", label: "author"},
+                            {value: "title", label: "titulo"},
+                            {value: "author", label: "autor"},
                             {value: "ISBN", label: "ISBN"},
-                            {value: "category", label: "category"},
-                            {value: "available", label: "available"}
+                            {value: "category", label: "categoría"},
+                            {value: "available", label: "disponible"}
                         ].map((option) => (
                             <label className="search_option" key={option.value}>
                                 <input
@@ -105,6 +105,7 @@ function Books({setPanel}) {
                 books.map((_book, index) => (
                     book == index + 1 ? <Book
                     key={index}
+                    user={user}
                     title={_book.titulo}
                     isbn={_book.isbn}
                     editorial={_book.editorial}

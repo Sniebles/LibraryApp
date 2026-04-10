@@ -16,10 +16,32 @@ function UserReg({ setPanel }) {
     setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault()
-    console.log('Registro de usuario:', formData)
-    setPanel(0)
+    try {
+      const res = await fetch('http://localhost:3001/users', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(formData)
+      })
+      .then(res => {
+        if (!res.ok) {
+          throw new Error(`HTTP error! status: ${res.status}`)
+        }
+        return res.json()
+      })
+      .then(data => {
+        alert('Usuario registrado:' + JSON.stringify(data))
+        setPanel(0)
+      })
+      .catch(err => {
+        alert('Error registrando usuario:' + err.message)
+      })
+    } catch (error) {
+      alert('Error en la solicitud:' + error.message)
+    }
   }
 
   return (
@@ -64,6 +86,7 @@ function UserReg({ setPanel }) {
             <select name='rol' value={formData.rol} onChange={handleChange}>
               <option value='estudiante'>Estudiante</option>
               <option value='docente'>Docente</option>
+              <option value='bibliotecario'>Bibliotecario</option>
             </select>
           </label>
 

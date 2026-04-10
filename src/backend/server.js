@@ -211,6 +211,7 @@ app.get("/user/mail/:mail", async (req, res) => {
 
     const [rows] = await db.execute(`
         SELECT 
+            u.id_usuario,
             u.codigo,
             u.identificacion,
             u.nombres,
@@ -236,81 +237,110 @@ app.get("/user/mail/:mail", async (req, res) => {
 app.post("/users", async (req, res) => {
 
     const { identificacion, nombres, correo, rol, carrera } = req.body;
-
-    const connection = await db.getConnection();
-
+    
     try {
-
-        await connection.beginTransaction();
-
-        const [lastUser] = await connection.execute(`
-            SELECT IFNULL(MAX(id_usuario),0)+1 AS next_id FROM Usuario
-        `);
-
-        const nextId = lastUser[0].next_id;
-        const codigo = `U${String(nextId).padStart(3, "0")}`;
-
-        const [result] = await connection.execute(`
+        const [usersCount] = await db.execute(
+            "SELECT COUNT(*) AS count FROM Usuario"
+        );
+        const codigo = `U00${usersCount[0].count + 1}`;
+        const [result] = await db.execute(`
             INSERT INTO Usuario (codigo, identificacion, nombres, correo)
             VALUES (?, ?, ?, ?)
         `, [codigo, identificacion, nombres, correo]);
 
         const id_usuario = result.insertId;
 
-        if (rol === "Estudiante") {
+        if (rol === "estudiante") {
 
             if (!carrera)
-                throw new Error("Carrera es obligatoria para estudiantes");
+                return res.status(400).json({
+                    error: "Carrera es obligatoria para estudiantes"
+                });
 
-            await connection.execute(`
+            await db.execute(`
                 INSERT INTO Estudiante (id_usuario, carrera)
                 VALUES (?, ?)
             `, [id_usuario, carrera]);
 
-        }
-        else if (rol === "Docente") {
+        } else if (rol === "docente") {
 
-            await connection.execute(`
+            await db.execute(`
                 INSERT INTO Docente (id_usuario)
                 VALUES (?)
             `, [id_usuario]);
 
-        }
-        else if (rol === "Bibliotecario") {
+        } else if (rol === "bibliotecario") {
 
-            await connection.execute(`
+            await db.execute(`
                 INSERT INTO Bibliotecario (id_usuario)
                 VALUES (?)
             `, [id_usuario]);
 
+        } else {
+            return res.status(400).json({
+                error: "Rol inválido"
+            });
         }
-        else {
-            throw new Error("Rol inválido");
-        }
-
-        await connection.commit();
 
         res.json({
             message: "Usuario creado correctamente",
             id_usuario
         });
 
-    }
-    catch (error) {
+    } catch (error) {
 
-        await connection.rollback();
+        console.log(error);
 
         res.status(500).json({
             error: error.message
         });
 
     }
-    finally {
+});
 
-        connection.release();
+app.post("/Borrow", async (req, res) => {
 
+    const { id_usuario, id_ejemplar } = req.body;
+    try {
+        await db.execute(`
+            INSERT INTO Prestamo (id_usuario, id_ejemplar, fecha_prestamo, fecha_vencimiento, fecha_aprobacion, aprobado_por)
+            VALUES (?, ?, NOW(), NOW() + INTERVAL 14 DAY, NULL, NULL)
+        `, [id_usuario, id_ejemplar]);
+        await db.execute(`
+            UPDATE ejemplar
+            SET estado = 'prestado'
+            WHERE id_ejemplar = ?
+        `, [id_ejemplar]);
+        res.json({ message: "Préstamo registrado correctamente" });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Error al registrar el préstamo" });
     }
+});
 
+app.get("/borrowed/:id_usuario", async (req, res) => {
+
+    const { id_usuario } = req.params;
+
+    try {
+        const [rows] = await db.execute(`
+            SELECT 
+                p.id_prestamo,
+                l.titulo,
+                e.codigo_barras,
+                p.fecha_prestamo,
+                p.fecha_vencimiento
+            FROM Prestamo p
+            JOIN ejemplar e ON p.id_ejemplar = e.id_ejemplar
+            LEFT JOIN libro l ON l.id_libro = e.id_libro
+            WHERE p.id_usuario = ?
+        `, [id_usuario]);
+
+        res.json(rows);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Error al obtener los préstamos" });
+    }
 });
 
 startServer();
