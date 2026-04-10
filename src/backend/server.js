@@ -331,9 +331,10 @@ app.get("/borrowed/:id_usuario", async (req, res) => {
                 p.fecha_prestamo,
                 p.fecha_vencimiento
             FROM Prestamo p
+            LEFT JOIN devolucion d ON p.id_prestamo = d.id_prestamo
             JOIN ejemplar e ON p.id_ejemplar = e.id_ejemplar
             LEFT JOIN libro l ON l.id_libro = e.id_libro
-            WHERE p.id_usuario = ?
+            WHERE p.id_usuario = ? AND d.id_prestamo IS NULL
         `, [id_usuario]);
 
         res.json(rows);
@@ -341,6 +342,30 @@ app.get("/borrowed/:id_usuario", async (req, res) => {
         console.error(error);
         res.status(500).json({ error: "Error al obtener los préstamos" });
     }
+});
+
+app.post("/return", async (req, res) => {
+
+    const { id_prestamo } = req.body;
+
+    try {
+        await db.execute(`
+            INSERT INTO devolucion (id_prestamo, fecha_devolucion, multa, observaciones, recibido_por)
+            VALUES (?, NOW(), 0, "", NULL)
+        `, [id_prestamo]);
+        await db.execute(`
+            UPDATE ejemplar e
+            INNER JOIN prestamo p ON e.id_ejemplar = p.id_ejemplar
+            SET e.estado = 'disponible'
+            WHERE p.id_prestamo = ?
+        `, [id_prestamo]);
+
+        res.json({ message: "Devolución registrada correctamente" });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Error al registrar la devolución" });
+    }
+
 });
 
 startServer();

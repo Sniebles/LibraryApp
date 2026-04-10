@@ -20,6 +20,24 @@ function Borrowed({setPanel, user}) {
         fetchBorrowed();
     }, [user.correo]);
 
+    const handleReturn = (id_prestamo) => {
+        fetch(`http://localhost:3001/Return`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ id_prestamo: id_prestamo })
+        })
+        .then(res => res.json())
+        .then(data => {
+            alert(data.message);
+            window.location.reload();
+        })
+        .catch(err => {
+            alert("Error returning book:" + err.message);
+        });
+    };
+
     return (
     <Panel type={0} setPanel={setPanel}>
         <div className='borrowed_content'>
@@ -32,6 +50,7 @@ function Borrowed({setPanel, user}) {
                                 <p>{item.codigo_barras}</p>
                                 <p>{item.fecha_prestamo}</p>
                                 <p>{item.fecha_vencimiento}</p>
+                                <button onClick={() => handleReturn(item.id_prestamo)} className='book_borrow_btn'>Devolver</button>
                             </div>
                         </Box>
                     ))
