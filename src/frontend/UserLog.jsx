@@ -22,7 +22,6 @@ function UserLog({ setPanel, formData2, setFormData2 }) {
         `http://localhost:3001/user/mail/${formData.correo}`
       )
 
-      /**/
       console.log("status:", res.status)
 
       const data = await res.json()
@@ -32,12 +31,11 @@ function UserLog({ setPanel, formData2, setFormData2 }) {
         return
       }
 
-      // guardar usuario autenticado en estado global
       setFormData2(data[0])
 
       setError(null)
       setPanel(0)
-
+      localStorage.setItem("mail", formData.correo);
     } catch (err) {
       setError("Error conectando con el servidor " + err.message)
 

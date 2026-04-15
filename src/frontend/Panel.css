@@ -12,7 +12,7 @@
 
 .panel {
     position: absolute;
-    background-color: rgba(255, 255, 255, 0.475);
+    background-color: var(--color-8);
     inset: 5rem;
     top: 2rem;
     bottom: 2rem;
@@ -22,6 +22,11 @@
     animation: panelEnter 0.3s ease forwards;
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
+}
+
+.panel_loose {
+    inset: auto;
+    position: relative;
 }
 
 .panel_content {

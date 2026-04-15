@@ -10,13 +10,16 @@ function Books({setPanel, user}) {
 
     const [filter, setFilter] = useState("title");
     const [search, setSearch] = useState("");
-    const [searchInput, setSearchInput] = useState("");
     
     useEffect(() => {
+        loadBooks();
+    }, [search, filter]);
+
+    const loadBooks = () => {
         const fetchBooks = async () => {
             try {
                 let url = "http://localhost:3001/books";
-                if (search.trim() !== "") {
+                if (search.trim() !== "" || filter === "available") {
                     switch (filter) {
                         case "title":
                             url = `http://localhost:3001/books/title/${encodeURIComponent(search)}`;
@@ -45,12 +48,13 @@ function Books({setPanel, user}) {
                 setBooks(data);
             } catch (error) {
                 console.error("Error fetching books:", error);
-                setBooks([]); // or keep previous books
+                setBooks([]);
             }
         };
 
         fetchBooks();
-    }, [search, filter]);
+    }
+
     return (
         <>
             <Panel type={0} setPanel={setPanel}>
@@ -88,14 +92,18 @@ function Books({setPanel, user}) {
                 </div>
                 <div className='books_content'>
                     {books.map((book, index) => (
-                        <Box onClick={() => setBook(index + 1)} key={index} className="book">
+                        <Box onClick={() => setBook(index + 1)} key={index} borderColor={book.disponibilidad !== "disponible" ? "var(--color-5)" : "var(--color-1)"} className="book">
                             <div>
                                 <h1>{book.titulo}</h1>
                                 <p>{book.isbn}</p>
                                 <p>{book.descripcion}</p>
                                 <p>{book.autores}</p>
                                 <p>{book.categorias}</p>
-                                <p>{book.disponibilidad}</p>
+                                {book.disponibilidad !== "disponible" &&
+                                <div className="unavailable_note">
+                                    <h2>No disponible</h2>
+                                </div>
+                                }
                             </div>
                         </Box>
                     ))}
@@ -104,6 +112,7 @@ function Books({setPanel, user}) {
             {
                 books.map((_book, index) => (
                     book == index + 1 ? <Book
+                    loadBooks={loadBooks}
                     key={index}
                     user={user}
                     title={_book.titulo}

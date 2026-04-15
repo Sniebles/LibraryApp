@@ -6,7 +6,7 @@
 }
 .book_title_background {
     position: absolute;
-    background-color: var(--color-2);
+    background-color: var(--color-9);
     width: 100%;
     display: flex;
     justify-content: center;
@@ -32,7 +32,7 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: var(--color-2);
+    background-color: var(--color-9);
     filter: blur(3px);
     z-index: -1;
     transition: all 0.3s ease;
@@ -45,7 +45,7 @@
     left: -9rem;
     right: -9rem;
     bottom: -2px;
-    border: 9rem solid var(--color-2);
+    border: 9rem solid var(--color-9);
     filter: blur(3rem);
     z-index: -1;
     height: 0;

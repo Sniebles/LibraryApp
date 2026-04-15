@@ -18,16 +18,10 @@
   right: 0;
   display: flex;
   justify-content: flex-end;
+  align-items: center;
   gap: 1rem;
   padding: 1rem;
-}
-
-.sign_in_div, .log_in_div{
-  height: 2.5rem;
-  width: 10rem;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  height: 3rem;
 }
 
 .sign_in, .log_in {
@@ -39,19 +33,81 @@
     border-radius: 2.5rem;
     border: 0.2rem solid var(--color-1);
     transition: all 0.3s ease;
+    width: 9rem;
 }
 
 .sign_in:hover, .log_in:hover {
-    width: 100%;
-    height: 100%;
-    font-size: 130%;
+    transform: scale(110%);
 }
 
 .sign_in:active, .log_in:active {
     transition: all 0.1s ease;
     background-color: var(--color-1);
     color: var(--color-2);
-    width: 80%;
-    height: 80%;
-    font-size: 100%;
+    transform: scale(100%);
+}
+
+.r_button {
+    margin-top: 0.5rem;
+    padding: 1rem 1.25rem;
+    border: none;
+    border-radius: 1rem;
+    background: var(--color-1);
+    color: var(--color-2);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.25s ease, transform 0.2s ease;
+}
+
+.r_button:hover {
+    background: var(--color-3);
+    transform: scale(110%);
+}
+
+.account_panel {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 20rem;
+    height: 50vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 2rem;
+    padding-top: 2rem;
+    margin-top: 2.5rem;
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-start;
+    pointer-events: all;
+}
+
+.account_content {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 27rem;
+    height: 50vh;
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-end;
+    pointer-events: none;
+}
+
+.account_panel h2 {
+  padding-left: 1rem;
+}
+
+.account_panel .account_buttons {
+  margin-left: 1rem;
+}
+
+.delete_account_btn {
+  background-color: var(--color-5);
+}
+
+.delete_account_btn:hover {
+  background-color: var(--color-6);
 }

@@ -1,8 +1,8 @@
-import { useState } from 'react'
+import { use, useEffect, useState } from 'react'
 import './UserReg.css'
 import Panel from './Panel'
 
-function UserReg({ setPanel }) {
+function UserReg({ setPanel, userData=null, setUserData}) {
   const [formData, setFormData] = useState({
     identificacion: '',
     nombres: '',
@@ -11,6 +11,12 @@ function UserReg({ setPanel }) {
     carrera: ''
   })
 
+  useEffect(() => {
+    if (userData) {
+      setFormData(userData)
+    }
+  }, [userData])
+
   const handleChange = (event) => {
     const { name, value } = event.target
     setFormData((prev) => ({ ...prev, [name]: value }))
@@ -18,8 +24,9 @@ function UserReg({ setPanel }) {
 
   const handleSubmit = async (event) => {
     event.preventDefault()
+    
     try {
-      const res = await fetch('http://localhost:3001/users', {
+      const res = await fetch(`http://localhost:3001/users${userData? '/update':''}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -28,12 +35,14 @@ function UserReg({ setPanel }) {
       })
       .then(res => {
         if (!res.ok) {
-          throw new Error(`HTTP error! status: ${res.status}`)
+          throw new Error(`HTTP error! status: ${res.status + res.error}`)
         }
         return res.json()
       })
       .then(data => {
         alert('Usuario registrado:' + JSON.stringify(data))
+        localStorage.setItem("mail", formData.correo);
+        setUserData(formData)
         setPanel(0)
       })
       .catch(err => {
@@ -46,7 +55,7 @@ function UserReg({ setPanel }) {
 
   return (
     <Panel setPanel={setPanel} className='userreg_panel'>
-        <h2>Registro de usuario</h2>
+        <h2>{userData? 'Editor de usuario':'Registro de usuario'}</h2>
         <form className='userreg_form' onSubmit={handleSubmit}>
           <label>
             Identificación
@@ -101,7 +110,7 @@ function UserReg({ setPanel }) {
           </label>
 
           <button type='submit' className='userreg_submit'>
-            Registrarse
+            {userData? 'Editar':'Registrarse'}
           </button>
         </form>
     </Panel>

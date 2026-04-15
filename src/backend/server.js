@@ -236,13 +236,28 @@ app.get("/user/mail/:mail", async (req, res) => {
 
 app.post("/users", async (req, res) => {
 
-    const { identificacion, nombres, correo, rol, carrera } = req.body;
+    let { identificacion, nombres, correo, rol, carrera } = req.body;
     
     try {
-        const [usersCount] = await db.execute(
-            "SELECT COUNT(*) AS count FROM Usuario"
+        const [usersCodes] = await db.execute(
+            "SELECT codigo FROM Usuario"
         );
-        const codigo = `U00${usersCount[0].count + 1}`;
+        let codigo = 1;
+        for (let i = 0; i < usersCodes.length; i++) {
+            const code = usersCodes[i].codigo;
+            const num = parseInt(code.replace("U00", ""));
+            if (num >= parseInt(codigo)) {
+                codigo = num + 1;
+            }
+        }
+        codigo = "U00" + codigo;
+
+        if (!identificacion || !nombres || !correo || !rol) {
+            return res.status(400).json({
+                error: `Faltan campo: ${!identificacion ? 'identificacion' : !nombres ? 'nombres' : !correo ? 'correo' : 'rol'}`
+            });
+        }
+
         const [result] = await db.execute(`
             INSERT INTO Usuario (codigo, identificacion, nombres, correo)
             VALUES (?, ?, ?, ?)
@@ -253,9 +268,7 @@ app.post("/users", async (req, res) => {
         if (rol === "estudiante") {
 
             if (!carrera)
-                return res.status(400).json({
-                    error: "Carrera es obligatoria para estudiantes"
-                });
+                carrera = null;
 
             await db.execute(`
                 INSERT INTO Estudiante (id_usuario, carrera)
@@ -298,6 +311,26 @@ app.post("/users", async (req, res) => {
     }
 });
 
+app.get("/users/pending" , async (req, res) => {
+    try {
+        const [rows] = await db.execute(`
+            select u.*, count(id_prestamo) as p_pendientes, if(count(id_prestamo) = 0, "no","si") as pendiente
+            from usuario u
+            left join (
+                select p.* from prestamo p
+                left join devolucion d on d.id_prestamo = p.id_prestamo
+                where p.aprobado_por is null or (d.recibido_por is null and d.id_devolucion is not null)
+                ) p on p.id_usuario = u.id_usuario
+            group by id_usuario
+            order by p_pendientes desc
+        `);
+        res.json(rows);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Error al obtener los usuarios" });
+    }
+});
+
 app.post("/Borrow", async (req, res) => {
 
     const { id_usuario, id_ejemplar } = req.body;
@@ -329,12 +362,14 @@ app.get("/borrowed/:id_usuario", async (req, res) => {
                 l.titulo,
                 e.codigo_barras,
                 p.fecha_prestamo,
-                p.fecha_vencimiento
+                p.fecha_vencimiento,
+                p.aprobado_por,
+                d.id_devolucion
             FROM Prestamo p
             LEFT JOIN devolucion d ON p.id_prestamo = d.id_prestamo
             JOIN ejemplar e ON p.id_ejemplar = e.id_ejemplar
             LEFT JOIN libro l ON l.id_libro = e.id_libro
-            WHERE p.id_usuario = ? AND d.id_prestamo IS NULL
+            WHERE p.id_usuario = ? AND (d.id_prestamo IS NULL OR d.recibido_por IS NULL)
         `, [id_usuario]);
 
         res.json(rows);
@@ -356,7 +391,7 @@ app.post("/return", async (req, res) => {
         await db.execute(`
             UPDATE ejemplar e
             INNER JOIN prestamo p ON e.id_ejemplar = p.id_ejemplar
-            SET e.estado = 'disponible'
+            SET e.estado = 'prestado'
             WHERE p.id_prestamo = ?
         `, [id_prestamo]);
 
@@ -366,6 +401,217 @@ app.post("/return", async (req, res) => {
         res.status(500).json({ error: "Error al registrar la devolución" });
     }
 
+});
+
+app.post("/return/approve", async (req, res) => {
+
+    const { id_prestamo, id_usuario } = req.body;
+
+    try {
+        await db.execute(`
+            UPDATE devolucion SET recibido_por = ?
+            WHERE id_prestamo = ?
+        `, [id_usuario, id_prestamo])
+        await db.execute(`
+            UPDATE ejemplar e
+            INNER JOIN prestamo p ON e.id_ejemplar = p.id_ejemplar
+            SET e.estado = 'disponible'
+            WHERE p.id_prestamo = ?
+        `, [id_prestamo]);
+
+        res.json({ message: "Devolución aprovada correctamente" });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Error al aprovar la devolución" });
+    }
+
+});
+
+app.post("/cancel", async (req, res) => {
+
+    const { id_prestamo } = req.body;
+
+    try {
+        await db.execute(`
+            update ejemplar e
+            inner join prestamo p on e.id_ejemplar = p.id_ejemplar
+            set e.estado = 'disponible'
+            where p.id_prestamo = ?
+        `, [id_prestamo]);
+        await db.execute(`
+            delete from prestamo where id_prestamo = ?
+        `, [id_prestamo]);
+
+        res.json({ message: "Préstamo cancelado correctamente" });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Error al cancelar el préstamo" });
+    }
+});
+
+app.delete("/users/delete/:id_usuario", async (req, res) => {
+
+    const { id_usuario } = req.params;
+
+    try {
+        await db.beginTransaction();
+
+        await db.execute(`
+            update ejemplar e
+            inner join prestamo p on e.id_ejemplar = p.id_ejemplar
+            set e.estado = 'disponible'
+            where p.id_usuario = ?
+        `, [id_usuario]);
+
+        await db.execute(`
+            delete from devolucion
+            where id_prestamo in (
+                select id_prestamo
+                from prestamo
+                where id_usuario = ?
+            )
+        `, [id_usuario]);
+        await db.execute(`
+            delete from prestamo
+            where id_usuario = ?
+        `, [id_usuario]);
+        await db.execute(`
+            delete from estudiante
+            where id_usuario = ?
+        `, [id_usuario]);
+        await db.execute(`
+            delete from docente
+            where id_usuario = ?
+        `, [id_usuario]);
+        await db.execute(`
+            delete from bibliotecario
+            where id_usuario = ?
+        `, [id_usuario]);
+        await db.execute(`
+            delete from usuario
+            where id_usuario = ?
+        `, [id_usuario]);
+
+        await db.commit();
+
+        res.json({ message: "Usuario eliminado correctamente" });
+    } catch (error) {
+        await db.rollback();
+        console.error(error);
+        res.status(500).json({
+            error: "Error al eliminar el usuario"
+        });
+    }
+});
+
+app.post("/users/update", async (req, res) => {
+
+    const { id_usuario, identificacion, nombres, correo, rol, carrera } = req.body;
+
+    try {
+        await db.beginTransaction();
+
+        let prevRol = await db.execute(`
+            SELECT 
+                CASE
+                    WHEN e.id_usuario IS NOT NULL THEN 'estudiante'
+                    WHEN d.id_usuario IS NOT NULL THEN 'docente'
+                    WHEN b.id_usuario IS NOT NULL THEN 'bibliotecario'
+                END AS rol_anterior
+            FROM usuario u
+            LEFT JOIN estudiante e ON u.id_usuario = e.id_usuario
+            LEFT JOIN docente d ON u.id_usuario = d.id_usuario
+            LEFT JOIN bibliotecario b ON u.id_usuario = b.id_usuario
+            WHERE u.id_usuario = ?
+        `, [id_usuario]);
+        prevRol = prevRol[0][0].rol_anterior;
+
+        if (prevRol !== rol) {
+            if (prevRol === "estudiante") {
+                await db.execute(`
+                    delete from estudiante
+                    where id_usuario = ?
+                `, [id_usuario]);
+            }
+            if (prevRol === "docente") {
+                await db.execute(`
+                    delete from docente
+                    where id_usuario = ?
+                `, [id_usuario]);
+            }
+            if (prevRol === "bibliotecario") {
+                await db.execute(`
+                    delete from bibliotecario
+                    where id_usuario = ?
+                `, [id_usuario]);
+            }
+            if (rol === "estudiante") {
+
+                if (!carrera)
+                    carrera = null;
+
+                await db.execute(`
+                    INSERT INTO Estudiante (id_usuario, carrera)
+                    VALUES (?, ?)
+                `, [id_usuario, carrera]);
+
+            } else if (rol === "docente") {
+
+                await db.execute(`
+                    INSERT INTO Docente (id_usuario)
+                    VALUES (?)
+                `, [id_usuario]);
+
+            } else if (rol === "bibliotecario") {
+
+                await db.execute(`
+                    INSERT INTO Bibliotecario (id_usuario)
+                    VALUES (?)
+                `, [id_usuario]);
+
+            } else {
+                await db.rollback();
+                throw new Error("Rol inválido");
+            }
+        }
+
+        await db.execute(`
+            UPDATE Estudiante
+            SET carrera = ?
+            WHERE id_usuario = ?
+        `, [carrera, id_usuario, id_usuario]);
+
+        await db.execute(`
+            UPDATE usuario
+            SET identificacion = ?, nombres = ?, correo = ?, updated_at = NOW()
+            WHERE id_usuario = ?
+        `, [identificacion, nombres, correo, id_usuario]);
+        
+        await db.commit();
+
+        res.json({ message: "Usuario actualizado correctamente" });
+    } catch (error) {
+        await db.rollback();
+        console.error(error);
+        res.status(500).json({ error: "Error al actualizar el usuario" });
+    }
+});
+
+app.post("/borrowed/approve", async (req, res) => {
+    const { id_prestamo, id_usuario } = req.body;
+
+    try {
+        await db.execute(`
+            UPDATE prestamo
+            SET aprobado_por = ?
+            WHERE id_prestamo = ?
+        `, [id_usuario, id_prestamo]);
+
+        res.json({ message: "Préstamo aprobado correctamente" });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Error al aprobar el préstamo" });
+    }
 });
 
 startServer();

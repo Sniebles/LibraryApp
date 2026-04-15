@@ -1,18 +1,20 @@
 :root {
-  --color-1: gray;
-  --color-2: rgb(255, 255, 255);
-  --color-3: rgb(213, 206, 220);
-  --color-4: rgb(77, 77, 77);
-  --color-5: white;
-  --color-6: white;
-  --color-7: white;
-  --color-8: white;
+  --color-1: #808080;
+  --color-2: #ffffff;
+  --color-3: #d5cedc;
+  --color-4: #4d4d4d;
+  --color-5: #d84242;
+  --color-6: #ffc402;
+  --color-7: #ffffff;
+  --color-8: #ffffff78;
+  --color-9: #fffef3;
 
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 body {
   margin: 0;
+  background-color: var(--color-7);
 }
 
 .non-selectable {
