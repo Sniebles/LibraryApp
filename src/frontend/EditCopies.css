@@ -1,0 +1,29 @@
+.add_copy_btn {
+    position: absolute;
+    right: 1rem;
+    bottom: 1rem;
+}
+
+.copies_panel {
+    height: 90vh;
+    width: 40vw;
+}
+
+.edit_copies_div {
+    padding: 1.5rem;
+    padding-top: 5rem;
+}
+
+.copies_add_panel {
+    width: 30rem;
+    padding: 1rem;
+    box-sizing: border-box;
+}
+
+.copies_add_div {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}

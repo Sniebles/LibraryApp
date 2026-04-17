@@ -7,6 +7,7 @@ import UserLog from './UserLog'
 import Borrowed from './Borrowed'
 import Panel from './Panel'
 import Admin from './Admin'
+import AddBook from './AddBook'
 
 function App() {
   const [formData, setFormData] = useState({
@@ -96,7 +97,7 @@ function App() {
         panel == 1 ? <Books user={formData} setPanel={setPanel} /> :
         panel === 2 ? <UserReg setUserData={setFormData} setPanel={setPanel} /> :
         panel === 3 ? <UserLog formData2={formData} setFormData2={setFormData} setPanel={setPanel} /> :
-        panel === 4 ? <Borrowed dataFromAdmin={dataFromAdmin} setDataFromAdmin={setDataFromAdmin} user={formData} setPanel={setPanel} /> :
+        panel === 4 ? <Borrowed dataFromAdmin={dataFromAdmin} setDataFromAdmin={setDataFromAdmin} user={formData} setUser={setFormData} setPanel={setPanel} /> :
         panel === 5 ?
         <div className='account_content'>
           <Panel setPanel={setPanel} background={false} className='account_panel'>

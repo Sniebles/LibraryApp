@@ -41,6 +41,7 @@
 }
 
 .userreg_form input,
+.userreg_form textarea,
 .userreg_form select {
     padding: 0.9rem 1rem;
     border: 0.15rem solid rgba(0, 0, 0, 0.12);
@@ -53,6 +54,7 @@
 }
 
 .userreg_form input:focus,
+.userreg_form textarea:focus,
 .userreg_form select:focus {
     border-color: var(--color-1);
     box-shadow: 0 0 0 0.2rem rgba(123, 97, 255, 0.12);

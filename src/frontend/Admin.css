@@ -16,3 +16,67 @@
     border-radius: 100vh;
     border: 2px, solid, var(--color-1);
 }
+
+.admin_edit_btn {
+    position: absolute;
+    left: 1rem;
+    bottom: 1rem;
+}
+
+.admin_delete_btn {
+    position: absolute;
+    right: 1rem;
+    bottom: 1rem;
+    background-color: var(--color-5);
+}
+
+.admin_delete_btn:hover {
+    background-color: var(--color-6);
+}
+
+.admin_add_btn {
+    position: fixed;
+    right: 2rem;
+    bottom: 2rem;
+    font-size: 100%;
+    background-color: var(--color-2);
+    color: var(--color-1);
+    height: 5rem;
+    border-radius: 2.5rem;
+    border: 0.2rem solid var(--color-1);
+    transition: all 0.3s ease;
+    width: 9rem;
+}
+
+.admin_add_btn:hover {
+    transform: scale(110%);
+}
+
+.admin_add_btn:active {
+    transition: all 0.1s ease;
+    background-color: var(--color-1);
+    color: var(--color-2);
+    transform: scale(100%);
+}
+
+.admin_date_picker {
+    border-radius: 100vh;
+    height: 2rem;
+}
+
+.books_topbar2 {
+    position: sticky;
+    top: 5rem;
+    margin-bottom: 2rem;
+    margin-left: 1rem;
+    z-index: 1;
+}
+
+.admin_book_editing {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2rem;
+}

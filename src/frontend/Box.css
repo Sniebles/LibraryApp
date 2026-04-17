@@ -4,7 +4,8 @@
     justify-content: center;
     width: var(--width);
     height: var(--height);
-    border: 0.2rem solid var(--border-color);
+    /*border: 1px solid var(--border-color);*/
+    box-shadow: 0 0 1rem var(--border-color), 0 0 30px var(--color-shadow-2);
     border-radius: 1rem;
     overflow: hidden;
     background: var(--color-2);
@@ -35,7 +36,7 @@
     transition: transform 0.3s ease;
 }
 .box_clickable:hover {
-    box-shadow: 0 0 15px #0000004d, 0 0 30px #0000001a;
+    box-shadow: 0 0 1rem var(--border-color), 0 0 30px #0000001a;
     background: var(--color-3);
     transform: scale(105%);
 }

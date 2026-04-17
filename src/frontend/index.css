@@ -8,6 +8,8 @@
   --color-7: #ffffff;
   --color-8: #ffffff78;
   --color-9: #fffef3;
+  --color-shadow: #c7c7c74d;
+  --color-shadow-2: #0000001a;
 
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
@@ -21,4 +23,8 @@ body {
   -webkit-user-select: none;
   -ms-user-select: none;
   user-select: none;
+}
+
+.bold {
+  font-weight: bold;
 }

@@ -112,3 +112,8 @@
     align-items: center;
     border-radius: 1rem;
 }
+
+.book_div {
+    padding: 1rem;
+    box-sizing: border-box;
+}

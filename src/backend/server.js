@@ -1,6 +1,7 @@
 import express from "express";
 import mysql from "mysql2/promise";
 import cors from "cors";
+import { ca } from "date-fns/locale";
 
 const app = express();
 
@@ -44,6 +45,40 @@ app.get("/books", async (req, res) => {
     `);
 
     res.json(rows);
+});
+
+app.get("/books/most_borrowed", async (req, res) => {
+
+    const { startDate, endDate } = req.query;
+
+    try {
+        const [rows] = await db.execute(`
+            SELECT 
+                l.*,
+                GROUP_CONCAT(DISTINCT a.nombre SEPARATOR ', ') AS autores,
+                GROUP_CONCAT(DISTINCT c.nombre SEPARATOR ', ') AS categorias,
+                CASE 
+                    WHEN MAX(e.estado = 'disponible') = 1 THEN 'disponible'
+                    ELSE 'no disponible'
+                END AS disponibilidad,
+                COUNT(DISTINCT p.id_prestamo) AS prestamos
+            FROM libro l
+            LEFT JOIN libro_autor la ON l.id_libro = la.id_libro
+            LEFT JOIN autor a ON la.id_autor = a.id_autor
+            LEFT JOIN libro_categoria lc ON l.id_libro = lc.id_libro
+            LEFT JOIN categoria c ON lc.id_categoria = c.id_categoria
+            LEFT JOIN ejemplar e ON l.id_libro = e.id_libro
+            LEFT JOIN prestamo p ON p.id_ejemplar = e.id_ejemplar
+            WHERE p.fecha_prestamo between ? and ?
+            GROUP BY l.id_libro
+            ORDER BY prestamos desc
+        `, [startDate, endDate]);
+
+        res.json(rows);
+    } catch (error) {
+        console.error("Error fetching most borrowed books:", error);
+        res.status(500).json({ error: "Internal server error" });
+    }
 });
 
 app.get("/books/title/:title", async (req, res) => {
@@ -364,12 +399,13 @@ app.get("/borrowed/:id_usuario", async (req, res) => {
                 p.fecha_prestamo,
                 p.fecha_vencimiento,
                 p.aprobado_por,
-                d.id_devolucion
+                d.id_devolucion,
+                d.multa
             FROM Prestamo p
             LEFT JOIN devolucion d ON p.id_prestamo = d.id_prestamo
             JOIN ejemplar e ON p.id_ejemplar = e.id_ejemplar
             LEFT JOIN libro l ON l.id_libro = e.id_libro
-            WHERE p.id_usuario = ? AND (d.id_prestamo IS NULL OR d.recibido_por IS NULL)
+            WHERE p.id_usuario = ? AND (d.id_prestamo IS NULL OR d.recibido_por IS NULL OR d.multa > 0)
         `, [id_usuario]);
 
         res.json(rows);
@@ -384,45 +420,100 @@ app.post("/return", async (req, res) => {
     const { id_prestamo } = req.body;
 
     try {
+
+        await db.beginTransaction();
+
         await db.execute(`
-            INSERT INTO devolucion (id_prestamo, fecha_devolucion, multa, observaciones, recibido_por)
-            VALUES (?, NOW(), 0, "", NULL)
+            INSERT INTO devolucion (
+                id_prestamo,
+                fecha_devolucion,
+                multa,
+                observaciones,
+                recibido_por
+            )
+            SELECT
+                p.id_prestamo,
+                CURRENT_DATE,
+                GREATEST(DATEDIFF(CURRENT_DATE, p.fecha_vencimiento), 0) * 1000,
+                NULL,
+                NULL
+            FROM prestamo p
+            WHERE p.id_prestamo = ?
         `, [id_prestamo]);
+
         await db.execute(`
             UPDATE ejemplar e
-            INNER JOIN prestamo p ON e.id_ejemplar = p.id_ejemplar
+            INNER JOIN prestamo p 
+                ON e.id_ejemplar = p.id_ejemplar
             SET e.estado = 'prestado'
             WHERE p.id_prestamo = ?
         `, [id_prestamo]);
 
-        res.json({ message: "Devolución registrada correctamente" });
+        await db.commit();
+
+        res.json({
+            message: "Devolución registrada correctamente"
+        });
+
     } catch (error) {
+
+        await db.rollback();
+
         console.error(error);
-        res.status(500).json({ error: "Error al registrar la devolución" });
+
+        res.status(500).json({
+            error: "Error al registrar la devolución"
+        });
     }
 
 });
 
 app.post("/return/approve", async (req, res) => {
 
-    const { id_prestamo, id_usuario } = req.body;
+    const { id_prestamo, id_usuario, observaciones = null } = req.body;
 
     try {
-        await db.execute(`
-            UPDATE devolucion SET recibido_por = ?
+
+        await db.beginTransaction();
+
+        const [result] = await db.execute(`
+            UPDATE devolucion
+            SET recibido_por = ?, observaciones = ?
             WHERE id_prestamo = ?
-        `, [id_usuario, id_prestamo])
+        `, [id_usuario, observaciones, id_prestamo]);
+
+        if (result.affectedRows === 0) {
+
+            await db.rollback();
+
+            return res.status(404).json({
+                error: "Devolución no encontrada"
+            });
+        }
+
         await db.execute(`
             UPDATE ejemplar e
-            INNER JOIN prestamo p ON e.id_ejemplar = p.id_ejemplar
+            INNER JOIN prestamo p
+                ON e.id_ejemplar = p.id_ejemplar
             SET e.estado = 'disponible'
             WHERE p.id_prestamo = ?
         `, [id_prestamo]);
 
-        res.json({ message: "Devolución aprovada correctamente" });
+        await db.commit();
+
+        res.json({
+            message: "Devolución aprobada correctamente"
+        });
+
     } catch (error) {
+
+        await db.rollback();
+
         console.error(error);
-        res.status(500).json({ error: "Error al aprovar la devolución" });
+
+        res.status(500).json({
+            error: "Error al aprobar la devolución"
+        });
     }
 
 });
@@ -612,6 +703,430 @@ app.post("/borrowed/approve", async (req, res) => {
         console.error(error);
         res.status(500).json({ error: "Error al aprobar el préstamo" });
     }
+});
+
+app.post("/books/add", async (req, res) => {
+
+    const { isbn, titulo, editorial, anio, descripcion, autores, categorias } = req.body;
+
+    try {
+        await db.beginTransaction();
+
+        await db.execute(`
+            INSERT INTO libro (isbn, titulo, editorial, anio, descripcion)
+            VALUES (?, ?, ?, ?, ?)
+        `, [isbn, titulo, editorial, anio, descripcion]);
+
+        const autoresSplit = autores
+            .split(",")
+            .map(a => a.trim())
+            .filter(a => a.length > 0);
+
+        const categoriasSplit = categorias
+            .split(",")
+            .map(c => c.trim())
+            .filter(c => c.length > 0);
+
+        if (autoresSplit.length > 0) {
+            await db.execute(`
+                INSERT INTO autor (nombre)
+                SELECT *
+                FROM (
+                    SELECT ? AS nombre
+                    ${autoresSplit.slice(1).map(() => "UNION SELECT ?").join("\n")}
+                ) AS nuevos
+                WHERE nombre NOT IN (SELECT nombre FROM autor)
+            `, autoresSplit);
+        }
+
+        if (categoriasSplit.length > 0) {
+            await db.execute(`
+                INSERT INTO categoria (nombre)
+                SELECT *
+                FROM (
+                    SELECT ? AS nombre
+                    ${categoriasSplit.slice(1).map(() => "UNION SELECT ?").join("\n")}
+                ) AS nuevas
+                WHERE nombre NOT IN (SELECT nombre FROM categoria)
+            `, categoriasSplit);
+        }
+
+        if (autoresSplit.length > 0) {
+            await db.execute(`
+                INSERT INTO libro_autor (id_libro, id_autor)
+                SELECT l.id_libro, a.id_autor
+                FROM libro l, autor a
+                WHERE l.isbn = ? 
+                AND a.nombre IN (${autoresSplit.map(() => "?").join(", ")})
+            `, [isbn, ...autoresSplit]);
+        }
+
+        if (categoriasSplit.length > 0) {
+            await db.execute(`
+                INSERT INTO libro_categoria (id_libro, id_categoria)
+                SELECT l.id_libro, c.id_categoria
+                FROM libro l, categoria c
+                WHERE l.isbn = ? 
+                AND c.nombre IN (${categoriasSplit.map(() => "?").join(", ")})
+            `, [isbn, ...categoriasSplit]);
+        }
+
+        await db.commit();
+
+        res.json({ message: "Libro agregado correctamente" });
+
+    } catch (error) {
+
+        await db.rollback();
+
+        console.error(error);
+
+        res.status(500).json({ error: "Error al agregar el libro" });
+    }
+});
+
+app.post("/books/update", async (req, res) => {
+
+    const { id_libro, isbn, titulo, editorial, anio, descripcion, autores, categorias } = req.body;
+
+    try {
+        await db.beginTransaction();
+
+        const autoresSplit = autores.split(",")
+            .map(a => a.trim())
+            .filter(a => a.length > 0);
+        const categoriasSplit = categorias.split(",")
+            .map(c => c.trim())
+            .filter(c => c.length > 0);
+
+        await db.execute(`
+            UPDATE libro
+            SET isbn = ?, titulo = ?, editorial = ?, anio = ?, descripcion = ?
+            WHERE id_libro = ?
+        `, [isbn, titulo, editorial, anio, descripcion, id_libro]);
+
+        await db.execute(`
+            DELETE FROM libro_autor
+            WHERE id_libro = ?
+        `, [id_libro]);
+
+        await db.execute(`
+            DELETE FROM libro_categoria
+            WHERE id_libro = ?
+        `, [id_libro]);
+
+        await db.execute(`
+            INSERT INTO autor (nombre)
+            SELECT *
+            FROM (
+                SELECT ? AS nombre
+                ${autoresSplit.slice(1).map(() => "UNION SELECT ?").join("\n")}
+            ) AS nuevos
+            WHERE nombre NOT IN (SELECT nombre FROM autor)
+        `, autoresSplit);
+        
+        await db.execute(`
+            INSERT INTO categoria (nombre)
+            SELECT *
+            FROM (
+                SELECT ? AS nombre
+                ${categoriasSplit.slice(1).map(() => "UNION SELECT ?").join("\n")}
+            ) AS nuevas
+            WHERE nombre NOT IN (SELECT nombre FROM categoria)
+        `, categoriasSplit);
+
+        await db.execute(`
+            INSERT INTO libro_autor (id_libro, id_autor)
+            SELECT ?, a.id_autor
+            FROM autor a
+            WHERE a.nombre IN (${autoresSplit.map(() => "?").join(", ")})
+        `, [id_libro, ...autoresSplit]);
+
+        await db.execute(`
+            INSERT INTO libro_categoria (id_libro, id_categoria)
+            SELECT ?, c.id_categoria
+            FROM categoria c
+            WHERE c.nombre IN (${categoriasSplit.map(() => "?").join(", ")})
+        `, [id_libro, ...categoriasSplit]);
+
+        await db.commit();
+
+        res.json({ message: "Libro actualizado correctamente" });
+
+    } catch (error) {
+
+        await db.rollback();
+
+        console.error(error);
+
+        res.status(500).json({ error: "Error al actualizar el libro" });
+    }
+});
+
+app.get("/users/top_borrowers", async (req, res) => {
+
+    try {
+        const [rows] = await db.execute(`
+            SELECT 
+                u.*,
+                COUNT(p.id_prestamo) AS total_prestamos
+            FROM usuario u
+            JOIN prestamo p ON u.id_usuario = p.id_usuario
+            WHERE p.aprobado_por IS NOT NULL
+            GROUP BY u.id_usuario, u.nombres
+            ORDER BY total_prestamos DESC
+        `);
+
+        res.json(rows);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Error al obtener los usuarios con más préstamos" });
+    }
+});
+
+app.delete("/books/delete/:id_libro", async (req, res) => {
+
+    const { id_libro } = req.params;
+
+    try {
+
+        await db.execute(`
+            DELETE FROM libro
+            WHERE id_libro = ?
+        `, [id_libro]);
+
+        res.json({ message: "Libro eliminado correctamente" });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Error al eliminar el libro" });
+    }
+});
+
+app.post("/copies/add", async (req, res) => {
+
+    const { codigo_barras, ubicacion, estado = "disponible", id_libro } = req.body;
+
+    try {
+
+        const [result] = await db.execute(`
+            INSERT INTO ejemplar (codigo_barras, ubicacion, estado, id_libro)
+            VALUES (?, ?, ?, ?)
+        `, [codigo_barras, ubicacion, estado, id_libro]);
+
+        res.json({
+            message: "Ejemplar creado correctamente",
+            id_ejemplar: result.insertId
+        });
+
+    } catch (error) {
+
+        console.error(error);
+
+        res.status(500).json({
+            error: "Error al crear el ejemplar"
+        });
+    }
+});
+
+app.put("/copies/update/:id_ejemplar", async (req, res) => {
+
+    const { id_ejemplar } = req.params;
+
+    const {
+        codigo_barras,
+        ubicacion,
+        id_libro
+    } = req.body;
+
+    try {
+
+        const [result] = await db.execute(`
+            UPDATE ejemplar
+            SET
+                codigo_barras = ?,
+                ubicacion = ?,
+                id_libro = ?
+            WHERE id_ejemplar = ?
+        `, [codigo_barras, ubicacion, id_libro, id_ejemplar]);
+
+        if (result.affectedRows === 0) {
+
+            return res.status(404).json({
+                error: "Ejemplar no encontrado"
+            });
+        }
+
+        res.json({
+            message: "Ejemplar actualizado correctamente"
+        });
+
+    } catch (error) {
+
+        console.error(error);
+
+        res.status(500).json({
+            error: "Error al actualizar ejemplar"
+        });
+    }
+});
+
+app.delete("/copies/delete/:id_ejemplar", async (req, res) => {
+
+    const { id_ejemplar } = req.params;
+
+    try {
+
+        await db.beginTransaction();
+
+        await db.execute(`
+            DELETE d
+            FROM devolucion d
+            INNER JOIN prestamo p
+                ON d.id_prestamo = p.id_prestamo
+            WHERE p.id_ejemplar = ?
+        `, [id_ejemplar]);
+
+        await db.execute(`
+            DELETE FROM prestamo
+            WHERE id_ejemplar = ?
+        `, [id_ejemplar]);
+
+        const [result] = await db.execute(`
+            DELETE FROM ejemplar
+            WHERE id_ejemplar = ?
+        `, [id_ejemplar]);
+
+        if (result.affectedRows === 0) {
+
+            await db.rollback();
+
+            return res.status(404).json({
+                error: "Ejemplar no encontrado"
+            });
+        }
+
+        await db.commit();
+
+        res.json({
+            message: "Ejemplar eliminado correctamente (incluyendo préstamos asociados)"
+        });
+
+    } catch (error) {
+
+        await db.rollback();
+
+        console.error(error);
+
+        res.status(500).json({
+            error: "Error al eliminar ejemplar"
+        });
+    }
+});
+
+app.put("/users/block/:id_usuario", async (req, res) => {
+
+    const { id_usuario } = req.params;
+
+    try {
+
+        const [result] = await db.execute(`
+            UPDATE usuario
+            SET estado = 'bloqueado'
+            WHERE id_usuario = ?
+        `, [id_usuario]);
+
+        if (result.affectedRows === 0) {
+
+            return res.status(404).json({
+                error: "Usuario no encontrado"
+            });
+        }
+
+        res.json({
+            message: "Usuario bloqueado correctamente"
+        });
+
+    } catch (error) {
+
+        console.error(error);
+
+        res.status(500).json({
+            error: "Error al bloquear usuario"
+        });
+    }
+});
+
+app.put("/users/unblock/:id_usuario", async (req, res) => {
+
+    const { id_usuario } = req.params;
+
+    try {
+
+        const [result] = await db.execute(`
+            UPDATE usuario
+            SET estado = 'activo'
+            WHERE id_usuario = ?
+        `, [id_usuario]);
+
+        if (result.affectedRows === 0) {
+
+            return res.status(404).json({
+                error: "Usuario no encontrado"
+            });
+        }
+
+        res.json({
+            message: "Usuario activado correctamente"
+        });
+
+    } catch (error) {
+
+        console.error(error);
+
+        res.status(500).json({
+            error: "Error al activar usuario"
+        });
+    }
+});
+
+app.patch("/copies/toggle-lost/:id_ejemplar", async (req, res) => {
+
+    const { id_ejemplar } = req.params;
+
+    try {
+
+        const [result] = await db.execute(`
+            UPDATE ejemplar
+            SET estado = CASE
+                WHEN estado = 'perdido' THEN 'disponible'
+                WHEN estado = 'disponible' THEN 'perdido'
+            END
+            WHERE id_ejemplar = ?
+            AND estado IN ('disponible','perdido')
+        `, [id_ejemplar]);
+
+        if (result.affectedRows === 0) {
+
+            return res.status(400).json({
+                message: "No se puede cambiar el estado del ejemplar (puede estar prestado o eliminado)"
+            });
+
+        }
+
+        res.json({
+            message: "Estado del ejemplar actualizado correctamente"
+        });
+
+    } catch (error) {
+
+        console.error(error);
+
+        res.status(500).json({
+            error: "Error al actualizar el estado del ejemplar"
+        });
+
+    }
+
 });
 
 startServer();

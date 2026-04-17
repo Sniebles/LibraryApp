@@ -1,6 +1,9 @@
 import { useState, useEffect, use } from 'react'
 import './Book.css'
 import Panel from './Panel'
+import Barcode from "react-barcode";
+import Box from './Box';
+import Copies from './Copies';
 
 function Book({setBook, user, title, isbn, editorial, year, description, id_book, autores, categorias, disponibilidad, loadBooks}) {
   const [copies, setCopies] = useState([]);
@@ -39,33 +42,18 @@ function Book({setBook, user, title, isbn, editorial, year, description, id_book
   return (
     <div className='book_overlay'>
         <Panel background={false} setPanel={() => setBook(0)} className='book_panel'>
+          <div className='book_div'>
             <h1>{title}</h1>
-            <p>{isbn}</p>
-            <p>{editorial}</p>
-            <p>{year}</p>
-            <p>{description}</p>
-            <p>{autores}</p>
-            <p>{categorias}</p>
-            <p>{disponibilidad}</p>
-            <h2>Copies</h2>
-            {copies.map((copy, index) => (
-              <div key={index}>
-                <p>----------------------</p>
-                <p>codigo de barras: {copy.codigo_barras}</p>
-                <p>ubicasion: {copy.ubicacion}</p>
-                <p>estado: {copy.estado}</p>
-                {copy.estado === 'disponible' && (
-                  user.estado === 'activo' || !user.id_usuario ?
-                  user.id_usuario ? (
-                    <button onClick={() => handleBorrow(copy.id_ejemplar)} className='book_borrow_btn r_button'>Borrow</button>
-                  ) : (
-                    <h3>Por favor, inicie sesión para prestar este libro.</h3>
-                  ) : (
-                    <h3>No puedes prestar este libro. Por favor, contacta con la biblioteca.</h3>
-                  )
-                )}
-              </div>
-            ))}
+            <p><span className='bold'>isbn: </span> {isbn}</p>
+            <p><span className='bold'>editorial: </span>{editorial}</p>
+            <p><span className='bold'>año: </span>{year}</p>
+            <p><span className='bold'>description: </span>{description}</p>
+            <p><span className='bold'>autores: </span>{autores}</p>
+            <p><span className='bold'>categorias: </span>{categorias}</p>
+            <p><span className='bold'>disponibilidad: </span>{disponibilidad}</p>
+            <h2>Ejemplares</h2>
+            <Copies handleBorrow={handleBorrow} copies={copies} user={user} />
+          </div>
         </Panel>
     </div>
   )

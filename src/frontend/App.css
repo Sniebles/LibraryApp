@@ -58,6 +58,9 @@
     font-weight: 600;
     cursor: pointer;
     transition: background 0.25s ease, transform 0.2s ease;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }
 
 .r_button:hover {

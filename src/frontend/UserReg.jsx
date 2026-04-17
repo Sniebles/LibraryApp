@@ -1,4 +1,4 @@
-import { use, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import './UserReg.css'
 import Panel from './Panel'
 
@@ -40,7 +40,6 @@ function UserReg({ setPanel, userData=null, setUserData}) {
         return res.json()
       })
       .then(data => {
-        alert('Usuario registrado:' + JSON.stringify(data))
         localStorage.setItem("mail", formData.correo);
         setUserData(formData)
         setPanel(0)

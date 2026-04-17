@@ -16,12 +16,16 @@
     inset: 5rem;
     top: 2rem;
     bottom: 2rem;
-    border: 0.2rem solid var(--color-1);
+    box-shadow: 0 0 5rem var(--color-shadow), 0 0 30px var(--color-shadow-2);
     border-radius: 2.5rem;
     overflow: hidden;
     animation: panelEnter 0.3s ease forwards;
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
+}
+
+.no_background {
+    box-shadow: 0 0 1rem var(--color-shadow), 0 0 30px var(--color-shadow-2);
 }
 
 .panel_loose {

@@ -43,3 +43,36 @@
     background-color: var(--color-6);
     color: var(--color-2);
 }
+
+.borrowed_barcode {
+    width: 10rem;
+    height: 5rem;
+    position: absolute;
+    right: 1rem;
+    bottom: 0.5rem;
+}
+
+.block_btn {
+    background-color: var(--color-5);
+    position: absolute;
+    right: 1rem;
+    bottom: 1rem;
+}
+
+.block_btn:hover {
+    background-color: var(--color-6);
+}
+
+.borrowed_ops_panel {
+    width: min(400px, 90%);
+    padding: 2rem;
+}
+
+.borrowed_ops_div {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+}
