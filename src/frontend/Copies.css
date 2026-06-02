@@ -18,7 +18,7 @@
 }
 
 .book_copy {
-    height: 10rem;
+    height: 7rem;
     align-items: flex-end;
     justify-content: space-between;
     padding: 1rem;
@@ -36,10 +36,21 @@
     gap: 1rem;
 }
 
+.book_copies_btns *{
+    padding: 5px;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
 .book_copies_delete_btn {
-    background-color: var(--color-5);
+    background-color: var(--harmful-color);
 }
 
 .book_copies_delete_btn:hover {
-    background-color: var(--color-6);
+    background-color: var(--warning-color);
+}
+
+.book_copy_barcode {
+    height: 100%;
+    width: auto;
 }

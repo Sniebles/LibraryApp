@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react'
 import './UserReg.css'
-import Panel from './Panel'
 
-function UserReg({ setPanel, userData=null, setUserData}) {
+function UserReg({ userData=null, setUserData, close, onDone}) {
   const [formData, setFormData] = useState({
     identificacion: '',
     nombres: '',
@@ -42,7 +41,8 @@ function UserReg({ setPanel, userData=null, setUserData}) {
       .then(data => {
         localStorage.setItem("mail", formData.correo);
         setUserData(formData)
-        setPanel(0)
+        if (typeof onDone === 'function') onDone()
+        else if (typeof close === 'function') close()
       })
       .catch(err => {
         alert('Error registrando usuario:' + err.message)
@@ -53,7 +53,7 @@ function UserReg({ setPanel, userData=null, setUserData}) {
   }
 
   return (
-    <Panel setPanel={setPanel} className='userreg_panel'>
+    <>
         <h2>{userData? 'Editor de usuario':'Registro de usuario'}</h2>
         <form className='userreg_form' onSubmit={handleSubmit}>
           <label>
@@ -112,7 +112,7 @@ function UserReg({ setPanel, userData=null, setUserData}) {
             {userData? 'Editar':'Registrarse'}
           </button>
         </form>
-    </Panel>
+    </>
   )
 }
 

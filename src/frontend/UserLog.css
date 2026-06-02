@@ -17,7 +17,7 @@
 
 .userlog_close:hover {
     transform: scale(1.05);
-    background: var(--color-3);
+    background: var(--highlight-color);
 }
 
 .userlog_modal h2 {
@@ -54,7 +54,7 @@
 
 .userlog_form input:focus,
 .userlog_form select:focus {
-    border-color: var(--color-1);
+    border-color: var(--secondary-color);
     box-shadow: 0 0 0 0.2rem rgba(123, 97, 255, 0.12);
 }
 
@@ -63,7 +63,7 @@
     padding: 1rem 1.25rem;
     border: none;
     border-radius: 1rem;
-    background: var(--color-1);
+    background: var(--secondary-color);
     color: var(--color-2);
     font-size: 1rem;
     font-weight: 600;
@@ -72,7 +72,8 @@
 }
 
 .userlog_submit:hover {
-    background: var(--color-3);
+    background: var(--highlight-color);
+    color: var(--text-color-secondary);
     transform: translateY(-1px);
 }
 

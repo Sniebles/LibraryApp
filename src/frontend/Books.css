@@ -9,6 +9,7 @@
     margin-bottom: 1.5rem;
     padding: 1rem 1rem 0 1rem;
     z-index: 1;
+    color: var(--text-color-secondary);
 }
 
 .books_topbar * {
@@ -106,7 +107,7 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(255, 255, 255, 0.8);
+    background: var(--unavailable-color);
     display: flex;
     justify-content: center;
     align-items: center;

@@ -2,10 +2,9 @@ import { useEffect, useState } from 'react';
 import './Borrowed.css'
 import './UserReg.css'
 import Box from './Box'
-import Panel from './Panel'
 import Barcode from 'react-barcode';
 
-function Borrowed({setPanel, user, setUser, dataFromAdmin = null, setDataFromAdmin}) {
+function Borrowed({user, setUser, dataFromAdmin = null, setDataFromAdmin, close}) {
     const userData = dataFromAdmin? dataFromAdmin : user;
     const [selectedLoan, setSelectedLoan] = useState(null);
     const [formData, setFormData] = useState({
@@ -148,7 +147,6 @@ function Borrowed({setPanel, user, setUser, dataFromAdmin = null, setDataFromAdm
 
     return (
     <>
-        <Panel type={0} setPanel={() => {dataFromAdmin? dataFromAdmin.setPanel() : setPanel(0); setDataFromAdmin(null)}}>
             <div className='borrowed_content'>
                 {
                     borrowed.length > 0 ? (
@@ -222,11 +220,10 @@ function Borrowed({setPanel, user, setUser, dataFromAdmin = null, setDataFromAdm
                     Desbloquear usuario
                 </button>)
             }
-        </Panel>
         {
             selectedLoan &&
             <div className='borrowed_ops_div'>
-                <Panel loose={true} className="borrowed_ops_panel" setPanel={() => setSelectedLoan(null)} background={true}>
+                <div className="borrowed_ops_panel">
                     <form className='userreg_form' onSubmit={(e) => { e.preventDefault(); handleAproveReturn(selectedLoan); }}>
                         <h2>Confirmar Devolución</h2>
                         <label>
@@ -241,7 +238,7 @@ function Borrowed({setPanel, user, setUser, dataFromAdmin = null, setDataFromAdm
                             Aprobar
                         </button>
                     </form>
-                </Panel>
+                </div>
             </div>
         }
     </>

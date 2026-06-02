@@ -1,48 +1,9 @@
 import { useEffect, useState } from "react";
 import "./EditCopies.css"
-import Panel from "./Panel"
 import Copies from "./Copies";
-import { tr } from "date-fns/locale";
 
-function EditCopies({setPanel, id_book}) {
+function EditCopies({ onDone, id_book, addPopup }) {
     const [copies, setCopies] = useState([]);
-    const [subPanel, setSubPanel] = useState(0);
-
-    const [formData, setFormData] = useState({
-        codigo_barras: '',
-        ubicacion: ''
-    })
-
-    const handleChange = (event) => {
-        const { name, value } = event.target
-        setFormData((prev) => ({ ...prev, [name]: value }))
-    }
-
-    const handleAddCopy = async (event) => {
-        event.preventDefault()
-
-        try {
-            const res = await fetch(`http://localhost:3001/copies/add`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    id_libro: id_book,
-                    codigo_barras: formData.codigo_barras,
-                    ubicacion: formData.ubicacion
-                })
-            })
-            const data = await res.json()
-            console.log(data)
-        } catch (error) {
-            alert('Error adding copy: ' + error.message)
-            console.error('Error adding copy:', error)
-        }
-        loadCopies();
-        setSubPanel(0);
-
-    }
 
     useEffect(() => {
         loadCopies();
@@ -50,11 +11,11 @@ function EditCopies({setPanel, id_book}) {
 
     const loadCopies = () => {
         fetch(`http://localhost:3001/copies/${id_book}`)
-        .then(res => res.json())
-        .then(data => {
-            setCopies(data);
-        })
-        .catch(err => alert('Error fetching copies:', err));
+            .then(res => res.json())
+            .then(data => {
+                setCopies(data);
+            })
+            .catch(err => alert('Error fetching copies: ' + err));
     }
 
     const handleDelete = async (copyId) => {
@@ -75,17 +36,39 @@ function EditCopies({setPanel, id_book}) {
         loadCopies();
     };
 
-    const handleEdit = (copy) => {
-        setFormData({
-            id_ejemplar: copy.id_ejemplar,
-            codigo_barras: copy.codigo_barras,
-            ubicacion: copy.ubicacion
-        });
-        setSubPanel(2);
-    };
+    const openAddCopyPopup = () => {
+        addPopup(<CopyForm mode='add' />, '30rem', 'auto')
+    }
 
-    const handleEditCopy = async (event) => {
-        event.preventDefault();
+    const openEditCopyPopup = (copy) => {
+        addPopup(<CopyForm mode='edit' initialData={copy} />, '30rem', 'auto')
+    }
+
+    const addCopy = async (formData, close) => {
+        try {
+            const res = await fetch(`http://localhost:3001/copies/add`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    id_libro: id_book,
+                    codigo_barras: formData.codigo_barras,
+                    ubicacion: formData.ubicacion
+                })
+            })
+            const data = await res.json()
+            console.log(data)
+            if (typeof close === 'function') close()
+        } catch (error) {
+            alert('Error adding copy: ' + error.message)
+            console.error('Error adding copy:', error)
+        }
+        loadCopies();
+        if (typeof onDone === 'function') onDone();
+    }
+
+    const editCopy = async (formData, close) => {
         try {
             const res = await fetch(`http://localhost:3001/copies/update/${formData.id_ejemplar}`, {
                 method: 'PUT',
@@ -97,60 +80,85 @@ function EditCopies({setPanel, id_book}) {
                     ubicacion: formData.ubicacion,
                     id_libro: id_book
                 })
-            });
-            const data = await res.json();
-            console.log(data);
+            })
+            const data = await res.json()
+            console.log(data)
+            if (typeof close === 'function') close()
         } catch (error) {
-            alert('Error editing copy: ' + error.message);
-            console.error('Error editing copy:', error);
+            alert('Error editing copy: ' + error.message)
+            console.error('Error editing copy:', error)
         }
         loadCopies();
-        setSubPanel(0);
-    };
+        if (typeof onDone === 'function') onDone();
+    }
+
+    const CopyForm = ({ mode, initialData = {}, close }) => {
+        const [formData, setFormData] = useState({
+            codigo_barras: initialData.codigo_barras || '',
+            ubicacion: initialData.ubicacion || '',
+            id_ejemplar: initialData.id_ejemplar || null
+        })
+
+        const handleChange = (event) => {
+            const { name, value } = event.target
+            setFormData(prev => ({ ...prev, [name]: value }))
+        }
+
+        const handleSubmit = async (event) => {
+            event.preventDefault()
+            if (mode === 'edit') {
+                await editCopy(formData, close)
+            } else {
+                await addCopy(formData, close)
+            }
+        }
+
+        return (
+            <>
+                <div className="copies_add_panel">
+                    <h2>{mode === 'edit' ? 'Editar ejemplar' : 'Añadir ejemplar'}</h2>
+                    <form className='userreg_form' onSubmit={handleSubmit}>
+                        <label>
+                            Codigo barras
+                            <input
+                                type='text'
+                                name='codigo_barras'
+                                value={formData.codigo_barras}
+                                onChange={handleChange}
+                                required
+                            />
+                        </label>
+
+                        <label>
+                            Ubicacion
+                            <input
+                                type='text'
+                                name='ubicacion'
+                                value={formData.ubicacion}
+                                onChange={handleChange}
+                                required
+                            />
+                        </label>
+
+                        <button type='submit' className='userreg_submit'>
+                            {mode === 'edit' ? 'Editar' : 'Añadir'}
+                        </button>
+                    </form>
+                </div>
+            </>
+        )
+    }
 
     return (
         <>
-            <Panel setPanel={setPanel} className="copies_panel" loose={true} background={false}>
+            <div className="copies_panel">
                 <div className="edit_copies_div">
-                    <Copies loadCopies={loadCopies} handleDelete={handleDelete} handleEdit={handleEdit} copies={copies} />
-                    <button className="add_copy_btn r_button" onClick={() => {setSubPanel(1); setFormData({codigo_barras: '', ubicacion: ''})}}>
+                    <Copies loadCopies={loadCopies} handleDelete={handleDelete} handleEdit={openEditCopyPopup} copies={copies} />
+                    <button className="add_copy_btn r_button" onClick={openAddCopyPopup}>
                         Añadir ejemplar
                     </button>
                 </div>
-            </Panel>
-            {(subPanel === 1 || subPanel === 2) &&
-            <div className="copies_add_div">
-                <Panel loose={true} className="copies_add_panel" background={false} setPanel={setSubPanel}>
-                    <h2>{subPanel === 2 ? 'Editar ejemplar':'Añadir ejemplar'}</h2>
-                    <form className='userreg_form' onSubmit={subPanel === 2 ? handleEditCopy : handleAddCopy}>
-                    <label>
-                        Codigo barras
-                        <input
-                        type='text'
-                        name='codigo_barras'
-                        value={formData.codigo_barras}
-                        onChange={handleChange}
-                        required
-                        />
-                    </label>
-
-                    <label>
-                        Ubicacion
-                        <input
-                        type='text'
-                        name='ubicacion'
-                        value={formData.ubicacion}
-                        onChange={handleChange}
-                        required
-                        />
-                    </label>
-
-                    <button type='submit' className='userreg_submit'>
-                        {subPanel === 2 ? 'Editar':'Añadir'}
-                    </button>
-                    </form>
-                </Panel>
-            </div>}
+            </div>
         </>
     )
 }

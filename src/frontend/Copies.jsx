@@ -35,7 +35,7 @@ function Copies({copies, loadCopies, user, handleBorrow, handleEdit, handleDelet
         <div className='book_copies'>
             {copies.map((copy, index) => (
             <Box clickable={false} className='book_copy' key={index}>
-                <Barcode value={copy.codigo_barras} />
+                <Barcode className='book_copy_barcode' value={copy.codigo_barras} />
                 <div className='book_copy_right'>
                 <div className='book_copy_text'>
                     <p>ubicasion: {copy.ubicacion}</p>

@@ -2,14 +2,34 @@ import { useEffect, useState } from "react";
 import Book from './Book';
 import './Books.css'
 import Box from './Box'
-import Panel from './Panel'
 
-function Books({setPanel, user}) {
-    const [book, setBook] = useState(0)
+function Books({close, user, addPopup}) {
+
     const [books, setBooks] = useState([]);
 
     const [filter, setFilter] = useState("title");
     const [search, setSearch] = useState("");
+
+    const setBook = (index) => {
+        const book = books[index - 1]
+        addPopup(
+            <Book
+                loadBooks={loadBooks}
+                key={index}
+                user={user}
+                title={book.titulo}
+                isbn={book.isbn}
+                editorial={book.editorial}
+                year={book.anio}
+                description={book.descripcion}
+                id_book={book.id_libro}
+                autores={book.autores}
+                categorias={book.categorias}
+                disponibilidad={book.disponibilidad}
+                setBook={setBook} />,
+            '30rem', '70%'
+        )
+    }
     
     useEffect(() => {
         loadBooks();
@@ -57,76 +77,56 @@ function Books({setPanel, user}) {
 
     return (
         <>
-            <Panel type={0} setPanel={setPanel}>
-                <div className="books_topbar">
-                    <div className="search_input_wrapper">
-                        <label htmlFor="bookSearch">Buscar</label>
-                        <input
-                            id="bookSearch"
-                            type="text"
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                            placeholder="Buscar por término..."
-                        />
-                    </div>
-                    <div className="search_options">
-                        {[
-                            {value: "title", label: "titulo"},
-                            {value: "author", label: "autor"},
-                            {value: "ISBN", label: "ISBN"},
-                            {value: "category", label: "categoría"},
-                            {value: "available", label: "disponible"}
-                        ].map((option) => (
-                            <label className="search_option" key={option.value}>
-                                <input
-                                    type="radio"
-                                    name="searchField"
-                                    value={option.value}
-                                    checked={filter === option.value}
-                                    onChange={() => setFilter(option.value)}
-                                />
-                                <span>{option.label}</span>
-                            </label>
-                        ))}
-                    </div>
+            <div className="books_topbar">
+                <div className="search_input_wrapper">
+                    <label htmlFor="bookSearch">Buscar</label>
+                    <input
+                        id="bookSearch"
+                        type="text"
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                        placeholder="Buscar por término..."
+                    />
                 </div>
-                <div className='books_content'>
-                    {books.map((book, index) => (
-                        <Box onClick={() => setBook(index + 1)} key={index} borderColor={book.disponibilidad !== "disponible" ? "var(--color-5)" : "var(--color-1)"} className="book">
-                            <div>
-                                <h1>{book.titulo}</h1>
-                                <p>{book.isbn}</p>
-                                <p>{book.descripcion}</p>
-                                <p>{book.autores}</p>
-                                <p>{book.categorias}</p>
-                                {book.disponibilidad !== "disponible" &&
-                                <div className="unavailable_note">
-                                    <h2>No disponible</h2>
-                                </div>
-                                }
-                            </div>
-                        </Box>
+                <div className="search_options">
+                    {[
+                        {value: "title", label: "titulo"},
+                        {value: "author", label: "autor"},
+                        {value: "ISBN", label: "ISBN"},
+                        {value: "category", label: "categoría"},
+                        {value: "available", label: "disponible"}
+                    ].map((option) => (
+                        <label className="search_option" key={option.value}>
+                            <input
+                                type="radio"
+                                name="searchField"
+                                value={option.value}
+                                checked={filter === option.value}
+                                onChange={() => setFilter(option.value)}
+                            />
+                            <span>{option.label}</span>
+                        </label>
                     ))}
                 </div>
-            </Panel>
-            {
-                books.map((_book, index) => (
-                    book == index + 1 ? <Book
-                    loadBooks={loadBooks}
-                    key={index}
-                    user={user}
-                    title={_book.titulo}
-                    isbn={_book.isbn}
-                    editorial={_book.editorial}
-                    year={_book.anio}
-                    description={_book.descripcion}
-                    id_book={_book.id_libro}
-                    autores={_book.autores}
-                    categorias={_book.categorias}
-                    disponibilidad={_book.disponibilidad}
-                    setBook={setBook} /> : null
-                ))
-            }
+            </div>
+            <div className='books_content'>
+                {books.map((book, index) => (
+                    <Box onClick={() => setBook(index + 1)} key={index} borderColor={book.disponibilidad !== "disponible" ? "var(--warning-color)" : "transparent"} className="book">
+                        <div>
+                            <h1>{book.titulo}</h1>
+                            <p>{book.isbn}</p>
+                            <p>{book.descripcion}</p>
+                            <p>{book.autores}</p>
+                            <p>{book.categorias}</p>
+                            {book.disponibilidad !== "disponible" &&
+                            <div className="unavailable_note">
+                                <h2>No disponible</h2>
+                            </div>
+                            }
+                        </div>
+                    </Box>
+                ))}
+            </div>
         </>
     )
 }

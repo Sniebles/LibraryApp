@@ -1,8 +1,7 @@
 import { useState } from 'react'
 import './UserLog.css'
-import Panel from './Panel'
 
-function UserLog({ setPanel, formData2, setFormData2 }) {
+function UserLog({ formData2, setFormData2, close, onDone }) {
   const [formData, setFormData] = useState({
     correo: ''
   })
@@ -34,7 +33,8 @@ function UserLog({ setPanel, formData2, setFormData2 }) {
       setFormData2(data[0])
 
       setError(null)
-      setPanel(0)
+      if (typeof onDone === 'function') onDone()
+      else if (typeof close === 'function') close()
       localStorage.setItem("mail", formData.correo);
     } catch (err) {
       setError("Error conectando con el servidor " + err.message)
@@ -43,8 +43,7 @@ function UserLog({ setPanel, formData2, setFormData2 }) {
   }
 
   return (
-    <Panel setPanel={setPanel} className='userlog_panel'>
-
+    <>
         <h2>Iniciar sesión</h2>
 
         <form className='userlog_form' onSubmit={handleSubmit}>
@@ -72,7 +71,7 @@ function UserLog({ setPanel, formData2, setFormData2 }) {
 
         </form>
 
-    </Panel>
+    </>
   )
 }
 

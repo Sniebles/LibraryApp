@@ -8,13 +8,13 @@
 }
 
 .to_be_approved .text {
-    background-color: var(--color-3);
+    background-color: var(--primary-color);
     width: 12rem;
     display: flex;
     justify-content: center;
     align-items: center;
     border-radius: 100vh;
-    border: 2px, solid, var(--color-1);
+    border: 2px, solid, var(--secondary-color);
 }
 
 .admin_edit_btn {
@@ -27,11 +27,11 @@
     position: absolute;
     right: 1rem;
     bottom: 1rem;
-    background-color: var(--color-5);
+    background-color: var(--harmful-color);
 }
 
 .admin_delete_btn:hover {
-    background-color: var(--color-6);
+    background-color: var(--warning-color);
 }
 
 .admin_add_btn {
@@ -39,11 +39,13 @@
     right: 2rem;
     bottom: 2rem;
     font-size: 100%;
-    background-color: var(--color-2);
-    color: var(--color-1);
+    background-color: var(--primary-color);
+    color: var(--text-color);
     height: 5rem;
     border-radius: 2.5rem;
-    border: 0.2rem solid var(--color-1);
+    border: none;
+    border-bottom: 3px solid var(--secondary-color);
+    box-shadow: 0 0.5rem 1rem var(--shadow-color);
     transition: all 0.3s ease;
     width: 9rem;
 }
@@ -54,8 +56,8 @@
 
 .admin_add_btn:active {
     transition: all 0.1s ease;
-    background-color: var(--color-1);
-    color: var(--color-2);
+    background-color: var(--secondary-color);
+    color: var(--text-color);
     transform: scale(100%);
 }
 
@@ -73,10 +75,13 @@
 }
 
 .admin_book_editing {
-    position: absolute;
-    inset: 0;
     display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 2rem;
+    gap: 1rem;
+    height: 100%;
+}
+
+.admin_book_add {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: auto;
 }
