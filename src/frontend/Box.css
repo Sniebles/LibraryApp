@@ -1,0 +1,46 @@
+.box {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    width: var(--width);
+    height: var(--height);
+    /*border: 1px solid var(--border-color);*/
+    box-shadow: 0 0 1rem var(--border-color), 0 0 30px var(--color-shadow-2);
+    border-radius: 1rem;
+    overflow: hidden;
+    background: var(--primary-color);
+    transition: box-shadow 0.3s ease, background 0.5s ease;
+    z-index: 0;
+}
+
+.box > * {
+    z-index: 1;
+}
+
+.box::before {
+    content: '';
+    position: absolute;
+    top: var(--mouse-y);
+    left: var(--mouse-x);
+    width: calc(min(var(--width, 100%), var(--height, 100%)) * 5);
+    height: calc(min(var(--width, 100%), var(--height, 100%)) * 5);
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    background: radial-gradient(circle at center, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0) 30%, transparent 65%);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    z-index: 0;
+}
+.box_clickable {
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+.box_clickable:hover {
+    box-shadow: 0 0 1rem var(--border-color), 0 0 30px #0000001a;
+    background: var(--primary-color);
+    transform: scale(105%);
+}
+
+.box_clickable:hover::before {
+    opacity: 1;
+}

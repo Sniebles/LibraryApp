@@ -1,0 +1,32 @@
+.button-container * {
+    padding: 10px;
+    border: none;
+    border-radius: 20px;
+    background-color: var(--secondary-color);
+    color: var(--text-color);
+    transition:
+        background-color 0.3s,
+        transform 0.3s,
+        color 0.3s;
+    pointer-events: none;
+}
+
+.button-container:hover * {
+    background-color: var(--text-color);
+    color: var(--secondary-color);
+    transform: scale(1.05);
+}
+
+.button-container:active * {
+    transform: scale(0.95);
+    box-shadow: inset 0 0 10px var(--shadow-color);
+    transition: transform 0s;
+}
+
+.button-container {
+    display: inline-block;
+    border-radius: 20px;
+    border: none;
+    padding: 0;
+    background-color: transparent;
+}

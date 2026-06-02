@@ -1,0 +1,21 @@
+.book_overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.panel.book_panel {
+    position: relative;
+    padding: 0;
+    margin: 0;
+    inset: 0;
+    width: 40rem;
+    height: 95vh;
+}
+
+.book_borrow_btn {
+    margin-left: 2rem;
+    padding: 0.2rem 0.8rem;
+}
