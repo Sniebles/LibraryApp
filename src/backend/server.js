@@ -13,7 +13,7 @@ let db;
 async function startServer() {
 
     db = await mysql.createConnection({
-        host: "mysql",
+        host: "localhost",
         user: "root2",
         password: "123456",
         database: "lab"
