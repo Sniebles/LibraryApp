@@ -12,12 +12,22 @@ let db;
 
 async function startServer() {
 
-    db = await mysql.createConnection({
-        host: "localhost",
-        user: "root2",
-        password: "123456",
-        database: "lab"
-    });
+    while (!db) {
+        try {
+            db = await mysql.createConnection({
+                host: "mysql",
+                user: "root2",
+                password: "123456",
+                database: "lab"
+            });
+
+            console.log("Conectado a MySQL");
+
+        } catch (err) {
+            console.log("Esperando MySQL...");
+            await new Promise(resolve => setTimeout(resolve, 5000));
+        }
+    }
 
     app.listen(3001, () => {
         console.log("Server running on port 3001");
@@ -35,12 +45,12 @@ app.get("/books", async (req, res) => {
                 WHEN MAX(e.estado = 'disponible') = 1 THEN 'disponible'
                 ELSE 'no disponible'
             END AS disponibilidad
-        FROM libro l
-        LEFT JOIN libro_autor la ON l.id_libro = la.id_libro
-        LEFT JOIN autor a ON la.id_autor = a.id_autor
-        LEFT JOIN libro_categoria lc ON l.id_libro = lc.id_libro
-        LEFT JOIN categoria c ON lc.id_categoria = c.id_categoria
-        LEFT JOIN ejemplar e ON l.id_libro = e.id_libro
+        FROM Libro l
+        LEFT JOIN Libro_Autor la ON l.id_libro = la.id_libro
+        LEFT JOIN Autor a ON la.id_autor = a.id_autor
+        LEFT JOIN Libro_Categoria lc ON l.id_libro = lc.id_libro
+        LEFT JOIN Categoria c ON lc.id_categoria = c.id_categoria
+        LEFT JOIN Ejemplar e ON l.id_libro = e.id_libro
         GROUP BY l.id_libro
     `);
 
