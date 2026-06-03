@@ -72,13 +72,13 @@ app.get("/books/most_borrowed", async (req, res) => {
                     ELSE 'no disponible'
                 END AS disponibilidad,
                 COUNT(DISTINCT p.id_prestamo) AS prestamos
-            FROM libro l
-            LEFT JOIN libro_autor la ON l.id_libro = la.id_libro
-            LEFT JOIN autor a ON la.id_autor = a.id_autor
-            LEFT JOIN libro_categoria lc ON l.id_libro = lc.id_libro
-            LEFT JOIN categoria c ON lc.id_categoria = c.id_categoria
-            LEFT JOIN ejemplar e ON l.id_libro = e.id_libro
-            LEFT JOIN prestamo p ON p.id_ejemplar = e.id_ejemplar
+            FROM Libro l
+            LEFT JOIN Libro_Autor la ON l.id_libro = la.id_libro
+            LEFT JOIN Autor a ON la.id_autor = a.id_autor
+            LEFT JOIN Libro_Categoria lc ON l.id_libro = lc.id_libro
+            LEFT JOIN Categoria c ON lc.id_categoria = c.id_categoria
+            LEFT JOIN Ejemplar e ON l.id_libro = e.id_libro
+            LEFT JOIN Prestamo p ON p.id_ejemplar = e.id_ejemplar
             WHERE p.fecha_prestamo between ? and ?
             GROUP BY l.id_libro
             ORDER BY prestamos desc
@@ -104,12 +104,12 @@ app.get("/books/title/:title", async (req, res) => {
                 WHEN MAX(e.estado = 'disponible') = 1 THEN 'disponible'
                 ELSE 'no disponible'
             END AS disponibilidad
-        FROM libro l
-        LEFT JOIN libro_autor la ON l.id_libro = la.id_libro
-        LEFT JOIN autor a ON la.id_autor = a.id_autor
-        LEFT JOIN libro_categoria lc ON l.id_libro = lc.id_libro
-        LEFT JOIN categoria c ON lc.id_categoria = c.id_categoria
-        LEFT JOIN ejemplar e ON l.id_libro = e.id_libro
+        FROM Libro l
+        LEFT JOIN Libro_Autor la ON l.id_libro = la.id_libro
+        LEFT JOIN Autor a ON la.id_autor = a.id_autor
+        LEFT JOIN Libro_Categoria lc ON l.id_libro = lc.id_libro
+        LEFT JOIN Categoria c ON lc.id_categoria = c.id_categoria
+        LEFT JOIN Ejemplar e ON l.id_libro = e.id_libro
         WHERE l.titulo LIKE ?
         GROUP BY l.id_libro
     `, [`%${title}%`]);
@@ -130,12 +130,12 @@ app.get("/books/author/:author", async (req, res) => {
                 WHEN MAX(e.estado = 'disponible') = 1 THEN 'disponible'
                 ELSE 'no disponible'
             END AS disponibilidad
-        FROM libro l
-        JOIN libro_autor la ON l.id_libro = la.id_libro
-        JOIN autor a ON la.id_autor = a.id_autor
-        LEFT JOIN libro_categoria lc ON l.id_libro = lc.id_libro
-        LEFT JOIN categoria c ON lc.id_categoria = c.id_categoria
-        LEFT JOIN ejemplar e ON l.id_libro = e.id_libro
+        FROM Libro l
+        JOIN Libro_Autor la ON l.id_libro = la.id_libro
+        JOIN Autor a ON la.id_autor = a.id_autor
+        LEFT JOIN Libro_Categoria lc ON l.id_libro = lc.id_libro
+        LEFT JOIN Categoria c ON lc.id_categoria = c.id_categoria
+        LEFT JOIN Ejemplar e ON l.id_libro = e.id_libro
         WHERE a.nombre LIKE ?
         GROUP BY l.id_libro
     `, [`%${author}%`]);
@@ -156,12 +156,12 @@ app.get("/books/isbn/:isbn", async (req, res) => {
                 WHEN MAX(e.estado = 'disponible') = 1 THEN 'disponible'
                 ELSE 'no disponible'
             END AS disponibilidad
-        FROM libro l
-        LEFT JOIN libro_autor la ON l.id_libro = la.id_libro
-        LEFT JOIN autor a ON la.id_autor = a.id_autor
-        LEFT JOIN libro_categoria lc ON l.id_libro = lc.id_libro
-        LEFT JOIN categoria c ON lc.id_categoria = c.id_categoria
-        LEFT JOIN ejemplar e ON l.id_libro = e.id_libro
+        FROM Libro l
+        LEFT JOIN Libro_Autor la ON l.id_libro = la.id_libro
+        LEFT JOIN Autor a ON la.id_autor = a.id_autor
+        LEFT JOIN Libro_Categoria lc ON l.id_libro = lc.id_libro
+        LEFT JOIN Categoria c ON lc.id_categoria = c.id_categoria
+        LEFT JOIN Ejemplar e ON l.id_libro = e.id_libro
         WHERE l.isbn LIKE ?
         GROUP BY l.id_libro
     `, [`%${isbn}%`]);
@@ -182,12 +182,12 @@ app.get("/books/category/:category", async (req, res) => {
                 WHEN MAX(e.estado = 'disponible') = 1 THEN 'disponible'
                 ELSE 'no disponible'
             END AS disponibilidad
-        FROM libro l
-        LEFT JOIN libro_autor la ON l.id_libro = la.id_libro
-        LEFT JOIN autor a ON la.id_autor = a.id_autor
-        JOIN libro_categoria lc ON l.id_libro = lc.id_libro
-        JOIN categoria c ON lc.id_categoria = c.id_categoria
-        LEFT JOIN ejemplar e ON l.id_libro = e.id_libro
+        FROM Libro l
+        LEFT JOIN Libro_Autor la ON l.id_libro = la.id_libro
+        LEFT JOIN Autor a ON la.id_autor = a.id_autor
+        JOIN Libro_Categoria lc ON l.id_libro = lc.id_libro
+        JOIN Categoria c ON lc.id_categoria = c.id_categoria
+        LEFT JOIN Ejemplar e ON l.id_libro = e.id_libro
         WHERE c.nombre LIKE ?
         GROUP BY l.id_libro
     `, [`%${category}%`]);
@@ -212,12 +212,12 @@ app.get("/books/disponivility/:disponivility", async (req, res) => {
                 WHEN MAX(e.estado = 'disponible') = 1 THEN 'disponible'
                 ELSE 'no disponible'
             END AS disponibilidad
-        FROM libro l
-        LEFT JOIN libro_autor la ON l.id_libro = la.id_libro
-        LEFT JOIN autor a ON la.id_autor = a.id_autor
-        LEFT JOIN libro_categoria lc ON l.id_libro = lc.id_libro
-        LEFT JOIN categoria c ON lc.id_categoria = c.id_categoria
-        LEFT JOIN ejemplar e ON l.id_libro = e.id_libro
+        FROM Libro l
+        LEFT JOIN Libro_Autor la ON l.id_libro = la.id_libro
+        LEFT JOIN Autor a ON la.id_autor = a.id_autor
+        LEFT JOIN Libro_Categoria lc ON l.id_libro = lc.id_libro
+        LEFT JOIN Categoria c ON lc.id_categoria = c.id_categoria
+        LEFT JOIN Ejemplar e ON l.id_libro = e.id_libro
         GROUP BY l.id_libro
         HAVING ${estado}
     `);
@@ -232,7 +232,7 @@ app.get("/copies/:id_book", async (req, res) => {
         const { id_book } = req.params;
 
         const [rows] = await db.execute(
-            "SELECT * FROM ejemplar WHERE id_libro = ?",
+            "SELECT * FROM Ejemplar WHERE id_libro = ?",
             [id_book]
         );
 
@@ -262,9 +262,9 @@ app.get("/user/mail/:mail", async (req, res) => {
             u.nombres,
             u.correo,
             CASE
-                WHEN e.id_usuario IS NOT NULL THEN 'estudiante'
-                WHEN d.id_usuario IS NOT NULL THEN 'docente'
-                WHEN b.id_usuario IS NOT NULL THEN 'bibliotecario'
+                WHEN e.id_usuario IS NOT NULL THEN 'Estudiante'
+                WHEN d.id_usuario IS NOT NULL THEN 'Docente'
+                WHEN b.id_usuario IS NOT NULL THEN 'Bibliotecario'
                 ELSE 'sin rol'
             END AS rol,
             e.carrera,
@@ -310,7 +310,7 @@ app.post("/users", async (req, res) => {
 
         const id_usuario = result.insertId;
 
-        if (rol === "estudiante") {
+        if (rol === "Estudiante") {
 
             if (!carrera)
                 carrera = null;
@@ -320,14 +320,14 @@ app.post("/users", async (req, res) => {
                 VALUES (?, ?)
             `, [id_usuario, carrera]);
 
-        } else if (rol === "docente") {
+        } else if (rol === "Docente") {
 
             await db.execute(`
                 INSERT INTO Docente (id_usuario)
                 VALUES (?)
             `, [id_usuario]);
 
-        } else if (rol === "bibliotecario") {
+        } else if (rol === "Bibliotecario") {
 
             await db.execute(`
                 INSERT INTO Bibliotecario (id_usuario)
@@ -360,10 +360,10 @@ app.get("/users/pending" , async (req, res) => {
     try {
         const [rows] = await db.execute(`
             select u.*, count(id_prestamo) as p_pendientes, if(count(id_prestamo) = 0, "no","si") as pendiente
-            from usuario u
+            from Usuario u
             left join (
-                select p.* from prestamo p
-                left join devolucion d on d.id_prestamo = p.id_prestamo
+                select p.* from Prestamo p
+                left join Devolucion d on d.id_prestamo = p.id_prestamo
                 where p.aprobado_por is null or (d.recibido_por is null and d.id_devolucion is not null)
                 ) p on p.id_usuario = u.id_usuario
             group by id_usuario
@@ -385,7 +385,7 @@ app.post("/Borrow", async (req, res) => {
             VALUES (?, ?, NOW(), NOW() + INTERVAL 14 DAY, NULL, NULL)
         `, [id_usuario, id_ejemplar]);
         await db.execute(`
-            UPDATE ejemplar
+            UPDATE Ejemplar
             SET estado = 'prestado'
             WHERE id_ejemplar = ?
         `, [id_ejemplar]);
@@ -412,9 +412,9 @@ app.get("/borrowed/:id_usuario", async (req, res) => {
                 d.id_devolucion,
                 d.multa
             FROM Prestamo p
-            LEFT JOIN devolucion d ON p.id_prestamo = d.id_prestamo
-            JOIN ejemplar e ON p.id_ejemplar = e.id_ejemplar
-            LEFT JOIN libro l ON l.id_libro = e.id_libro
+            LEFT JOIN Devolucion d ON p.id_prestamo = d.id_prestamo
+            JOIN Ejemplar e ON p.id_ejemplar = e.id_ejemplar
+            LEFT JOIN Libro l ON l.id_libro = e.id_libro
             WHERE p.id_usuario = ? AND (d.id_prestamo IS NULL OR d.recibido_por IS NULL OR d.multa > 0)
         `, [id_usuario]);
 
@@ -434,7 +434,7 @@ app.post("/return", async (req, res) => {
         await db.beginTransaction();
 
         await db.execute(`
-            INSERT INTO devolucion (
+            INSERT INTO Devolucion (
                 id_prestamo,
                 fecha_devolucion,
                 multa,
@@ -447,13 +447,13 @@ app.post("/return", async (req, res) => {
                 GREATEST(DATEDIFF(CURRENT_DATE, p.fecha_vencimiento), 0) * 1000,
                 NULL,
                 NULL
-            FROM prestamo p
+            FROM Prestamo p
             WHERE p.id_prestamo = ?
         `, [id_prestamo]);
 
         await db.execute(`
-            UPDATE ejemplar e
-            INNER JOIN prestamo p 
+            UPDATE Ejemplar e
+            INNER JOIN Prestamo p 
                 ON e.id_ejemplar = p.id_ejemplar
             SET e.estado = 'prestado'
             WHERE p.id_prestamo = ?
@@ -487,7 +487,7 @@ app.post("/return/approve", async (req, res) => {
         await db.beginTransaction();
 
         const [result] = await db.execute(`
-            UPDATE devolucion
+            UPDATE Devolucion
             SET recibido_por = ?, observaciones = ?
             WHERE id_prestamo = ?
         `, [id_usuario, observaciones, id_prestamo]);
@@ -502,8 +502,8 @@ app.post("/return/approve", async (req, res) => {
         }
 
         await db.execute(`
-            UPDATE ejemplar e
-            INNER JOIN prestamo p
+            UPDATE Ejemplar e
+            INNER JOIN Prestamo p
                 ON e.id_ejemplar = p.id_ejemplar
             SET e.estado = 'disponible'
             WHERE p.id_prestamo = ?
@@ -534,13 +534,13 @@ app.post("/cancel", async (req, res) => {
 
     try {
         await db.execute(`
-            update ejemplar e
-            inner join prestamo p on e.id_ejemplar = p.id_ejemplar
+            update Ejemplar e
+            inner join Prestamo p on e.id_ejemplar = p.id_ejemplar
             set e.estado = 'disponible'
             where p.id_prestamo = ?
         `, [id_prestamo]);
         await db.execute(`
-            delete from prestamo where id_prestamo = ?
+            delete from Prestamo where id_prestamo = ?
         `, [id_prestamo]);
 
         res.json({ message: "Préstamo cancelado correctamente" });
@@ -558,38 +558,38 @@ app.delete("/users/delete/:id_usuario", async (req, res) => {
         await db.beginTransaction();
 
         await db.execute(`
-            update ejemplar e
-            inner join prestamo p on e.id_ejemplar = p.id_ejemplar
+            update Ejemplar e
+            inner join Prestamo p on e.id_ejemplar = p.id_ejemplar
             set e.estado = 'disponible'
             where p.id_usuario = ?
         `, [id_usuario]);
 
         await db.execute(`
-            delete from devolucion
+            delete from Devolucion
             where id_prestamo in (
                 select id_prestamo
-                from prestamo
+                from Prestamo
                 where id_usuario = ?
             )
         `, [id_usuario]);
         await db.execute(`
-            delete from prestamo
+            delete from Prestamo
             where id_usuario = ?
         `, [id_usuario]);
         await db.execute(`
-            delete from estudiante
+            delete from Estudiante
             where id_usuario = ?
         `, [id_usuario]);
         await db.execute(`
-            delete from docente
+            delete from Docente
             where id_usuario = ?
         `, [id_usuario]);
         await db.execute(`
-            delete from bibliotecario
+            delete from Bibliotecario
             where id_usuario = ?
         `, [id_usuario]);
         await db.execute(`
-            delete from usuario
+            delete from Usuario
             where id_usuario = ?
         `, [id_usuario]);
 
@@ -600,7 +600,7 @@ app.delete("/users/delete/:id_usuario", async (req, res) => {
         await db.rollback();
         console.error(error);
         res.status(500).json({
-            error: "Error al eliminar el usuario"
+            error: "Error al eliminar el Usuario"
         });
     }
 });
@@ -615,38 +615,38 @@ app.post("/users/update", async (req, res) => {
         let prevRol = await db.execute(`
             SELECT 
                 CASE
-                    WHEN e.id_usuario IS NOT NULL THEN 'estudiante'
-                    WHEN d.id_usuario IS NOT NULL THEN 'docente'
-                    WHEN b.id_usuario IS NOT NULL THEN 'bibliotecario'
+                    WHEN e.id_usuario IS NOT NULL THEN 'Estudiante'
+                    WHEN d.id_usuario IS NOT NULL THEN 'Docente'
+                    WHEN b.id_usuario IS NOT NULL THEN 'Bibliotecario'
                 END AS rol_anterior
-            FROM usuario u
-            LEFT JOIN estudiante e ON u.id_usuario = e.id_usuario
-            LEFT JOIN docente d ON u.id_usuario = d.id_usuario
-            LEFT JOIN bibliotecario b ON u.id_usuario = b.id_usuario
+            FROM Usuario u
+            LEFT JOIN Estudiante e ON u.id_usuario = e.id_usuario
+            LEFT JOIN Docente d ON u.id_usuario = d.id_usuario
+            LEFT JOIN Bibliotecario b ON u.id_usuario = b.id_usuario
             WHERE u.id_usuario = ?
         `, [id_usuario]);
         prevRol = prevRol[0][0].rol_anterior;
 
         if (prevRol !== rol) {
-            if (prevRol === "estudiante") {
+            if (prevRol === "Estudiante") {
                 await db.execute(`
-                    delete from estudiante
+                    delete from Estudiante
                     where id_usuario = ?
                 `, [id_usuario]);
             }
-            if (prevRol === "docente") {
+            if (prevRol === "Docente") {
                 await db.execute(`
-                    delete from docente
+                    delete from Docente
                     where id_usuario = ?
                 `, [id_usuario]);
             }
-            if (prevRol === "bibliotecario") {
+            if (prevRol === "Bibliotecario") {
                 await db.execute(`
-                    delete from bibliotecario
+                    delete from Bibliotecario
                     where id_usuario = ?
                 `, [id_usuario]);
             }
-            if (rol === "estudiante") {
+            if (rol === "Estudiante") {
 
                 if (!carrera)
                     carrera = null;
@@ -656,14 +656,14 @@ app.post("/users/update", async (req, res) => {
                     VALUES (?, ?)
                 `, [id_usuario, carrera]);
 
-            } else if (rol === "docente") {
+            } else if (rol === "Docente") {
 
                 await db.execute(`
                     INSERT INTO Docente (id_usuario)
                     VALUES (?)
                 `, [id_usuario]);
 
-            } else if (rol === "bibliotecario") {
+            } else if (rol === "Bibliotecario") {
 
                 await db.execute(`
                     INSERT INTO Bibliotecario (id_usuario)
@@ -683,7 +683,7 @@ app.post("/users/update", async (req, res) => {
         `, [carrera, id_usuario, id_usuario]);
 
         await db.execute(`
-            UPDATE usuario
+            UPDATE Usuario
             SET identificacion = ?, nombres = ?, correo = ?, updated_at = NOW()
             WHERE id_usuario = ?
         `, [identificacion, nombres, correo, id_usuario]);
@@ -694,7 +694,7 @@ app.post("/users/update", async (req, res) => {
     } catch (error) {
         await db.rollback();
         console.error(error);
-        res.status(500).json({ error: "Error al actualizar el usuario" });
+        res.status(500).json({ error: "Error al actualizar el Usuario" });
     }
 });
 
@@ -703,7 +703,7 @@ app.post("/borrowed/approve", async (req, res) => {
 
     try {
         await db.execute(`
-            UPDATE prestamo
+            UPDATE Prestamo
             SET aprobado_por = ?
             WHERE id_prestamo = ?
         `, [id_usuario, id_prestamo]);
@@ -723,7 +723,7 @@ app.post("/books/add", async (req, res) => {
         await db.beginTransaction();
 
         await db.execute(`
-            INSERT INTO libro (isbn, titulo, editorial, anio, descripcion)
+            INSERT INTO Libro (isbn, titulo, editorial, anio, descripcion)
             VALUES (?, ?, ?, ?, ?)
         `, [isbn, titulo, editorial, anio, descripcion]);
 
@@ -739,33 +739,33 @@ app.post("/books/add", async (req, res) => {
 
         if (autoresSplit.length > 0) {
             await db.execute(`
-                INSERT INTO autor (nombre)
+                INSERT INTO Autor (nombre)
                 SELECT *
                 FROM (
                     SELECT ? AS nombre
                     ${autoresSplit.slice(1).map(() => "UNION SELECT ?").join("\n")}
                 ) AS nuevos
-                WHERE nombre NOT IN (SELECT nombre FROM autor)
+                WHERE nombre NOT IN (SELECT nombre FROM Autor)
             `, autoresSplit);
         }
 
         if (categoriasSplit.length > 0) {
             await db.execute(`
-                INSERT INTO categoria (nombre)
+                INSERT INTO Categoria (nombre)
                 SELECT *
                 FROM (
                     SELECT ? AS nombre
                     ${categoriasSplit.slice(1).map(() => "UNION SELECT ?").join("\n")}
                 ) AS nuevas
-                WHERE nombre NOT IN (SELECT nombre FROM categoria)
+                WHERE nombre NOT IN (SELECT nombre FROM Categoria)
             `, categoriasSplit);
         }
 
         if (autoresSplit.length > 0) {
             await db.execute(`
-                INSERT INTO libro_autor (id_libro, id_autor)
+                INSERT INTO Libro_Autor (id_libro, id_autor)
                 SELECT l.id_libro, a.id_autor
-                FROM libro l, autor a
+                FROM Libro l, Autor a
                 WHERE l.isbn = ? 
                 AND a.nombre IN (${autoresSplit.map(() => "?").join(", ")})
             `, [isbn, ...autoresSplit]);
@@ -773,9 +773,9 @@ app.post("/books/add", async (req, res) => {
 
         if (categoriasSplit.length > 0) {
             await db.execute(`
-                INSERT INTO libro_categoria (id_libro, id_categoria)
+                INSERT INTO Libro_Categoria (id_libro, id_categoria)
                 SELECT l.id_libro, c.id_categoria
-                FROM libro l, categoria c
+                FROM Libro l, Categoria c
                 WHERE l.isbn = ? 
                 AND c.nombre IN (${categoriasSplit.map(() => "?").join(", ")})
             `, [isbn, ...categoriasSplit]);
@@ -791,7 +791,7 @@ app.post("/books/add", async (req, res) => {
 
         console.error(error);
 
-        res.status(500).json({ error: "Error al agregar el libro" });
+        res.status(500).json({ error: "Error al agregar el Libro" });
     }
 });
 
@@ -810,52 +810,52 @@ app.post("/books/update", async (req, res) => {
             .filter(c => c.length > 0);
 
         await db.execute(`
-            UPDATE libro
+            UPDATE Libro
             SET isbn = ?, titulo = ?, editorial = ?, anio = ?, descripcion = ?
             WHERE id_libro = ?
         `, [isbn, titulo, editorial, anio, descripcion, id_libro]);
 
         await db.execute(`
-            DELETE FROM libro_autor
+            DELETE FROM Libro_Autor
             WHERE id_libro = ?
         `, [id_libro]);
 
         await db.execute(`
-            DELETE FROM libro_categoria
+            DELETE FROM Libro_Categoria
             WHERE id_libro = ?
         `, [id_libro]);
 
         await db.execute(`
-            INSERT INTO autor (nombre)
+            INSERT INTO Autor (nombre)
             SELECT *
             FROM (
                 SELECT ? AS nombre
                 ${autoresSplit.slice(1).map(() => "UNION SELECT ?").join("\n")}
             ) AS nuevos
-            WHERE nombre NOT IN (SELECT nombre FROM autor)
+            WHERE nombre NOT IN (SELECT nombre FROM Autor)
         `, autoresSplit);
         
         await db.execute(`
-            INSERT INTO categoria (nombre)
+            INSERT INTO Categoria (nombre)
             SELECT *
             FROM (
                 SELECT ? AS nombre
                 ${categoriasSplit.slice(1).map(() => "UNION SELECT ?").join("\n")}
             ) AS nuevas
-            WHERE nombre NOT IN (SELECT nombre FROM categoria)
+            WHERE nombre NOT IN (SELECT nombre FROM Categoria)
         `, categoriasSplit);
 
         await db.execute(`
-            INSERT INTO libro_autor (id_libro, id_autor)
+            INSERT INTO Libro_Autor (id_libro, id_autor)
             SELECT ?, a.id_autor
-            FROM autor a
+            FROM Autor a
             WHERE a.nombre IN (${autoresSplit.map(() => "?").join(", ")})
         `, [id_libro, ...autoresSplit]);
 
         await db.execute(`
-            INSERT INTO libro_categoria (id_libro, id_categoria)
+            INSERT INTO Libro_Categoria (id_libro, id_categoria)
             SELECT ?, c.id_categoria
-            FROM categoria c
+            FROM Categoria c
             WHERE c.nombre IN (${categoriasSplit.map(() => "?").join(", ")})
         `, [id_libro, ...categoriasSplit]);
 
@@ -869,7 +869,7 @@ app.post("/books/update", async (req, res) => {
 
         console.error(error);
 
-        res.status(500).json({ error: "Error al actualizar el libro" });
+        res.status(500).json({ error: "Error al actualizar el Libro" });
     }
 });
 
@@ -880,8 +880,8 @@ app.get("/users/top_borrowers", async (req, res) => {
             SELECT 
                 u.*,
                 COUNT(p.id_prestamo) AS total_prestamos
-            FROM usuario u
-            JOIN prestamo p ON u.id_usuario = p.id_usuario
+            FROM Usuario u
+            JOIN Prestamo p ON u.id_usuario = p.id_usuario
             WHERE p.aprobado_por IS NOT NULL
             GROUP BY u.id_usuario, u.nombres
             ORDER BY total_prestamos DESC
@@ -901,14 +901,14 @@ app.delete("/books/delete/:id_libro", async (req, res) => {
     try {
 
         await db.execute(`
-            DELETE FROM libro
+            DELETE FROM Libro
             WHERE id_libro = ?
         `, [id_libro]);
 
         res.json({ message: "Libro eliminado correctamente" });
     } catch (error) {
         console.error(error);
-        res.status(500).json({ error: "Error al eliminar el libro" });
+        res.status(500).json({ error: "Error al eliminar el Libro" });
     }
 });
 
@@ -919,7 +919,7 @@ app.post("/copies/add", async (req, res) => {
     try {
 
         const [result] = await db.execute(`
-            INSERT INTO ejemplar (codigo_barras, ubicacion, estado, id_libro)
+            INSERT INTO Ejemplar (codigo_barras, ubicacion, estado, id_libro)
             VALUES (?, ?, ?, ?)
         `, [codigo_barras, ubicacion, estado, id_libro]);
 
@@ -933,7 +933,7 @@ app.post("/copies/add", async (req, res) => {
         console.error(error);
 
         res.status(500).json({
-            error: "Error al crear el ejemplar"
+            error: "Error al crear el Ejemplar"
         });
     }
 });
@@ -951,7 +951,7 @@ app.put("/copies/update/:id_ejemplar", async (req, res) => {
     try {
 
         const [result] = await db.execute(`
-            UPDATE ejemplar
+            UPDATE Ejemplar
             SET
                 codigo_barras = ?,
                 ubicacion = ?,
@@ -975,7 +975,7 @@ app.put("/copies/update/:id_ejemplar", async (req, res) => {
         console.error(error);
 
         res.status(500).json({
-            error: "Error al actualizar ejemplar"
+            error: "Error al actualizar Ejemplar"
         });
     }
 });
@@ -990,19 +990,19 @@ app.delete("/copies/delete/:id_ejemplar", async (req, res) => {
 
         await db.execute(`
             DELETE d
-            FROM devolucion d
-            INNER JOIN prestamo p
+            FROM Devolucion d
+            INNER JOIN Prestamo p
                 ON d.id_prestamo = p.id_prestamo
             WHERE p.id_ejemplar = ?
         `, [id_ejemplar]);
 
         await db.execute(`
-            DELETE FROM prestamo
+            DELETE FROM Prestamo
             WHERE id_ejemplar = ?
         `, [id_ejemplar]);
 
         const [result] = await db.execute(`
-            DELETE FROM ejemplar
+            DELETE FROM Ejemplar
             WHERE id_ejemplar = ?
         `, [id_ejemplar]);
 
@@ -1028,7 +1028,7 @@ app.delete("/copies/delete/:id_ejemplar", async (req, res) => {
         console.error(error);
 
         res.status(500).json({
-            error: "Error al eliminar ejemplar"
+            error: "Error al eliminar Ejemplar"
         });
     }
 });
@@ -1040,7 +1040,7 @@ app.put("/users/block/:id_usuario", async (req, res) => {
     try {
 
         const [result] = await db.execute(`
-            UPDATE usuario
+            UPDATE Usuario
             SET estado = 'bloqueado'
             WHERE id_usuario = ?
         `, [id_usuario]);
@@ -1061,7 +1061,7 @@ app.put("/users/block/:id_usuario", async (req, res) => {
         console.error(error);
 
         res.status(500).json({
-            error: "Error al bloquear usuario"
+            error: "Error al bloquear Usuario"
         });
     }
 });
@@ -1073,7 +1073,7 @@ app.put("/users/unblock/:id_usuario", async (req, res) => {
     try {
 
         const [result] = await db.execute(`
-            UPDATE usuario
+            UPDATE Usuario
             SET estado = 'activo'
             WHERE id_usuario = ?
         `, [id_usuario]);
@@ -1094,7 +1094,7 @@ app.put("/users/unblock/:id_usuario", async (req, res) => {
         console.error(error);
 
         res.status(500).json({
-            error: "Error al activar usuario"
+            error: "Error al activar Usuario"
         });
     }
 });
@@ -1106,7 +1106,7 @@ app.patch("/copies/toggle-lost/:id_ejemplar", async (req, res) => {
     try {
 
         const [result] = await db.execute(`
-            UPDATE ejemplar
+            UPDATE Ejemplar
             SET estado = CASE
                 WHEN estado = 'perdido' THEN 'disponible'
                 WHEN estado = 'disponible' THEN 'perdido'
@@ -1118,13 +1118,13 @@ app.patch("/copies/toggle-lost/:id_ejemplar", async (req, res) => {
         if (result.affectedRows === 0) {
 
             return res.status(400).json({
-                message: "No se puede cambiar el estado del ejemplar (puede estar prestado o eliminado)"
+                message: "No se puede cambiar el estado del Ejemplar (puede estar prestado o eliminado)"
             });
 
         }
 
         res.json({
-            message: "Estado del ejemplar actualizado correctamente"
+            message: "Estado del Ejemplar actualizado correctamente"
         });
 
     } catch (error) {
@@ -1132,7 +1132,7 @@ app.patch("/copies/toggle-lost/:id_ejemplar", async (req, res) => {
         console.error(error);
 
         res.status(500).json({
-            error: "Error al actualizar el estado del ejemplar"
+            error: "Error al actualizar el estado del Ejemplar"
         });
 
     }
