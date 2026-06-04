@@ -37,7 +37,7 @@
     display: grid;
     gap: 0.45rem;
     font-size: 0.95rem;
-    color: #333;
+    color: var(--text-color);
 }
 
 .userlog_form input,
@@ -46,7 +46,7 @@
     border: 0.15rem solid rgba(0, 0, 0, 0.12);
     border-radius: 0.85rem;
     background: #fff;
-    color: #111;
+    color: var(--text-color);
     font-size: 1rem;
     outline: none;
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
@@ -64,7 +64,7 @@
     border: none;
     border-radius: 1rem;
     background: var(--secondary-color);
-    color: var(--color-2);
+    color: var(--text-color);
     font-size: 1rem;
     font-weight: 600;
     cursor: pointer;

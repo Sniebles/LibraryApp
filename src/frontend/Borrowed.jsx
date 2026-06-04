@@ -3,8 +3,9 @@ import './Borrowed.css'
 import './UserReg.css'
 import Box from './Box'
 import Barcode from 'react-barcode';
+import Form from './components/Form';
 
-function Borrowed({user, setUser, dataFromAdmin = null, setDataFromAdmin, close}) {
+function Borrowed({user, setUser, dataFromAdmin = null, setDataFromAdmin, close, addPopup}) {
     const userData = dataFromAdmin? dataFromAdmin : user;
     const [selectedLoan, setSelectedLoan] = useState(null);
     const [formData, setFormData] = useState({
@@ -12,6 +13,27 @@ function Borrowed({user, setUser, dataFromAdmin = null, setDataFromAdmin, close}
     })
     
     const [borrowed, setBorrowed] = useState([]);
+
+    const formatDate = (dateStr) => {
+        if (!dateStr) return '';
+        const d = new Date(dateStr);
+        if (isNaN(d)) return dateStr;
+        return d.toLocaleDateString('es-ES');
+    }
+
+    const getDaysInfo = (dateStr) => {
+        if (!dateStr) return '';
+        const due = new Date(dateStr);
+        if (isNaN(due)) return '';
+        const today = new Date();
+        const utcToday = Date.UTC(today.getFullYear(), today.getMonth(), today.getDate());
+        const utcDue = Date.UTC(due.getFullYear(), due.getMonth(), due.getDate());
+        const diffDays = Math.floor((utcDue - utcToday) / (1000 * 60 * 60 * 24));
+        if (diffDays < 0) return `Atrasado por: ${Math.abs(diffDays)} dias`;
+        if (diffDays === 1) return 'falta: 1 dia';
+        if (diffDays === 0) return `Vence hoy`;
+        return `faltan: ${diffDays} dias`;
+    }
 
         useEffect(() => {
             if (userData.id_usuario) {
@@ -145,6 +167,46 @@ function Borrowed({user, setUser, dataFromAdmin = null, setDataFromAdmin, close}
         }
     };
 
+    const handleExtend = (id_prestamo) => {
+        addPopup(
+            <div>
+                <h2>Aplazar préstamo</h2>
+                <Form
+                    inputs={[
+                        { name: 'dias', label: 'Dias', type: 'range', min: 1, max: 14, required: true }
+                    ]}
+                    submitText='Aplazar'
+                    tile='Aplazar préstamo'
+                    getData={async (formData, close) => {
+                        try {
+                            const res = await fetch('http://localhost:3001/borrow/extend', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    id_prestamo,
+                                    dias_aplazo: formData.dias
+                                })
+                            })
+
+                            if (!res.ok) {
+                                const errorData = await res.json().catch(() => null)
+                                throw new Error(errorData?.error || 'Error al aplazar el préstamo')
+                            }
+
+                            await res.json()
+                            loadBorrowed()
+                            if (typeof close === 'function') close()
+                        } catch (err) {
+                            alert(err.message)
+                        }
+                    }}
+                />
+            </div>,
+            '400px',
+            'auto'
+        )
+    }
+
     return (
     <>
             <div className='borrowed_content'>
@@ -160,8 +222,9 @@ function Borrowed({user, setUser, dataFromAdmin = null, setDataFromAdmin, close}
                                 <div>
                                     <h1>{item.titulo}</h1>
                                     <Barcode width={3} height={100} className='borrowed_barcode' value={item.codigo_barras} />
-                                    <p>{item.fecha_prestamo}</p>
-                                    <p>{item.fecha_vencimiento}</p>
+                                    <p>fecha de prestamo: {formatDate(item.fecha_prestamo)}</p>
+                                    <p>fecha de vencimiento: {formatDate(item.fecha_vencimiento)}</p>
+                                    <p>{getDaysInfo(item.fecha_vencimiento)}</p>
                                     {item.aprobado_por ?
                                         <>
                                             <p>Aprobado por: {item.aprobado_por}</p>
@@ -182,9 +245,14 @@ function Borrowed({user, setUser, dataFromAdmin = null, setDataFromAdmin, close}
                                                     {item.multa !== null && item.multa > 0 && <p>Multa: {item.multa}</p>}
                                                 </div>
                                                 :
-                                                <button className='borrow_btn r_button' onClick={() => handleReturn(item.id_prestamo)}>
-                                                    Devolver
-                                                </button>
+                                                <div className='borrow_btns'>
+                                                    <button className='r_button' onClick={() => handleExtend(item.id_prestamo)}>
+                                                        Aplazar
+                                                    </button>
+                                                    <button className='r_button' onClick={() => handleReturn(item.id_prestamo)}>
+                                                        Devolver
+                                                    </button>
+                                                </div>
                                             }
                                         </>
                                     :

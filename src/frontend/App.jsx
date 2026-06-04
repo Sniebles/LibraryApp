@@ -13,11 +13,12 @@ import Popup from './components/Popup'
 function App() {
   //popups
   const [popups, setPopups] = useState([])
-  const addPopup = (content, width='auto', height='auto') => {
-    setPopups(prev => [...prev, { content, width, height }])
+  const addPopup = (content, width='auto', height='auto', focusColor='var(--secondary-color)') => {
+    const id = `${Date.now()}-${Math.random().toString(36).slice(2)}`
+    setPopups(prev => [...prev, { id, content, width, height, focusColor }])
   }
-  const removePopup = (index) => {
-    setPopups(prev => prev.filter((_, i) => i !== index))
+  const removePopup = (id) => {
+    setPopups(prev => prev.filter(popup => popup.id !== id))
   }
 
   const [formData, setFormData] = useState({
@@ -59,6 +60,56 @@ function App() {
     fetchUserData()
   }, [formData.correo]);
 
+  const getLoanDiffDays = (dateString) => {
+    if (!dateString) return null
+    const due = new Date(dateString)
+    if (Number.isNaN(due.getTime())) return null
+    const today = new Date()
+    const utcToday = Date.UTC(today.getFullYear(), today.getMonth(), today.getDate())
+    const utcDue = Date.UTC(due.getFullYear(), due.getMonth(), due.getDate())
+    return Math.floor((utcDue - utcToday) / (1000 * 60 * 60 * 24))
+  }
+
+  const checkLoanAlerts = async (userId) => {
+    try {
+      const res = await fetch(`http://localhost:3001/borrowed/${userId}`)
+      const loans = await res.json()
+
+      const alerts = loans.reduce((acc, loan) => {
+        const diffDays = getLoanDiffDays(loan.fecha_vencimiento)
+        if (diffDays === 1) {
+          acc.push(`Te queda solo 1 día para devolver el libro ${loan.titulo}.`)
+        } else if (diffDays != null && diffDays < 0) {
+          acc.push(`Estás atrasado por ${Math.abs(diffDays)} días con el libro ${loan.titulo}.`)
+        }
+        return acc
+      }, [])
+
+      if (alerts.length > 0) {
+        addPopup(
+          <div>
+            <h2>Atención</h2>
+            {alerts.map((message, index) => (
+              <p key={index}>{message}</p>
+            ))}
+          </div>,
+          '400px',
+          'auto',
+          alerts.some(msg => msg.includes('atrasado')) ?
+            'var(--harmful-color)':'var(--warning-color)'
+        )
+      }
+    } catch (err) {
+      console.error('Error fetching loan alerts:', err)
+    }
+  }
+
+  useEffect(() => {
+    if (formData.id_usuario) {
+      checkLoanAlerts(formData.id_usuario)
+    }
+  }, [formData.id_usuario])
+
   const handleLogout = () => {
     localStorage.removeItem("mail");
     setFormData({correo: ''}); setPopups([]);
@@ -81,7 +132,7 @@ function App() {
 
   const handleShowToApprove = (userData) => {
     setDataFromAdmin(userData);
-    addPopup(<Borrowed dataFromAdmin={userData} setDataFromAdmin={setDataFromAdmin} user={formData} setUser={setFormData} />, '80%', '80%')
+    addPopup(<Borrowed dataFromAdmin={userData} setDataFromAdmin={setDataFromAdmin} user={formData} setUser={setFormData} addPopup={addPopup} />, '80%', '80%')
   }
 
   return (
@@ -113,12 +164,20 @@ function App() {
       </div>
       <div className='options'>
         <Section onClick={() => addPopup(<Books user={formData} addPopup={addPopup} />, '80%', '80%')} text="Libros" img="https://letraslibres.com/wp-content/uploads/2016/05/libros-viejos-230813.jpg" />
-        <Section onClick={() => addPopup(<Borrowed dataFromAdmin={null} setDataFromAdmin={setDataFromAdmin} user={formData} setUser={setFormData} />, '80%', '80%')} text="Prestamos" img="https://www.comunidadbaratz.com/wp-content/uploads/Hay-muchisimos-libros-en-las-bibliotecas-pero-solamente-unos-pocos-comparten-el-privilegio-de-ser-los-mas-prestados-1.jpg" />
+        <Section onClick={() => addPopup(<Borrowed dataFromAdmin={null} setDataFromAdmin={setDataFromAdmin} user={formData} setUser={setFormData} addPopup={addPopup} />, '80%', '80%')} text="Prestamos" img="https://www.comunidadbaratz.com/wp-content/uploads/Hay-muchisimos-libros-en-las-bibliotecas-pero-solamente-unos-pocos-comparten-el-privilegio-de-ser-los-mas-prestados-1.jpg" />
         {formData.rol === "bibliotecario"? <Section onClick={() => addPopup(<Admin handleShowToApprove={handleShowToApprove} addPopup={addPopup} />, '80%', '80%')} text="Administracion" img="https://api.supercluster.mx/admin/content/image_news/569/files/14ae055ecb_ATURA_20210909212117613ac11dc6abf.jpg" /> : null}
       </div>
       {popups.length > 0 &&
         popups.map((popup, index) => (
-          <Popup focus={index === popups.length - 1} width={popup.width || 'auto'} height={popup.height || 'auto'} key={index} index={index} removePopup={removePopup}>
+          <Popup
+            focus={index === popups.length - 1}
+            width={popup.width || 'auto'}
+            height={popup.height || 'auto'}
+            key={popup.id}
+            id={popup.id}
+            removePopup={removePopup}
+            focusColor={popup.focusColor || 'var(--secondary-color)'}
+          >
             {popup.content}
           </Popup>
         ))

@@ -29,17 +29,23 @@
     border-radius: 1rem;
 }
 
-.borrow_btn {
+.borrow_btns {
     position: absolute;
     left: 1rem;
     bottom: 1rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.borrow_btns .r_button {
+    padding: 0.5rem 1rem;
 }
 
 .borrow_cancel {
     background-color: var(--secondary-color);
 }
 
-.borrow_btn:hover {
+.borrow_btns .r_button:hover {
     background-color: var(--highlight-color);
     color: var(--color-2);
 }

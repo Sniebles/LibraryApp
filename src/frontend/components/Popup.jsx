@@ -2,12 +2,12 @@ import React, { useState } from 'react'
 import Button from './Button'
 import './Popup.css'
 
-function Popup({children, index, removePopup, width='auto', height='auto', focus=false}) {
+function Popup({children, id, removePopup, width='auto', height='auto', focus=false, focusColor='var(--secondary-color)'}) {
     const [popupOut, setPopupOut] = useState(false)
 
     const handleAnimationEnd = () => {
         if (popupOut) {
-            removePopup(index)
+            removePopup(id)
         }
     }
 
@@ -24,7 +24,10 @@ function Popup({children, index, removePopup, width='auto', height='auto', focus
     }
 
     return (
-        <div className={`popup-overlay ${focus ? 'popup-focus' : ''}`}>
+        <div
+            className={`popup-overlay ${focus ? 'popup-focus' : ''}`}
+            style={{'--focus-color': focusColor}} 
+        >
             <div
                 onAnimationEnd={handleAnimationEnd}
                 className={`popup ${popupOut? 'popup-close':''}`}

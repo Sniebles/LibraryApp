@@ -1,5 +1,6 @@
 :root {
   --primary-color: #1f2224;
+  --primary-color-2: #2f3235;
   --secondary-color: #41994a;
   --highlight-color: #bbffc4;
   --background-color: #050505;
@@ -28,35 +29,32 @@ body {
 .bold {
   font-weight: bold;
 }
-/* scrollbar styles */
 /* Chrome, Edge, Opera, Safari */
 ::-webkit-scrollbar {
-    width: 10px;
-    height: 10px;
+    width: 16px;
+    height: 16px;
 }
 
 ::-webkit-scrollbar-track {
-    background: #1e1e1e;
-    border-radius: 999px;
+    background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-    background: #666;
-    border-radius: 999px;
-    border: 2px solid #1e1e1e;
-    transition: background 0.2s;
+    background: var(--secondary-color);
+    border-radius: 8px;
+    border: 3px solid transparent;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: #888;
+    filter: brightness(1.15);
 }
 
 ::-webkit-scrollbar-corner {
-    background: #1e1e1e;
+    background: transparent;
 }
 
 /* Firefox */
 * {
-    scrollbar-width: thin;
-    scrollbar-color: #666 #1e1e1e;
+    scrollbar-width: auto;
+    scrollbar-color: var(--secondary-color) transparent;
 }

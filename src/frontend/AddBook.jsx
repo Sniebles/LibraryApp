@@ -9,19 +9,26 @@ function AddBook({ bookData=null, close, onDone}) {
     editorial: '',
     anio: '',
     descripcion: '',
+    dias_prestamo: 8,
     autores: '',
     categorias: ''
   })
 
   useEffect(() => {
     if (bookData) {
-      setFormData(bookData)
+      setFormData({
+        ...bookData,
+        dias_prestamo: bookData.dias_prestamo ?? 8
+      })
     }
   }, [bookData])
 
   const handleChange = (event) => {
     const { name, value } = event.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
+    setFormData((prev) => ({
+      ...prev,
+      [name]: name === 'dias_prestamo' ? Number(value) : value
+    }))
   }
 
   const handleSubmit = async (event) => {
@@ -108,6 +115,18 @@ function AddBook({ bookData=null, close, onDone}) {
             type='text'
             name='descripcion'
             value={formData.descripcion}
+            onChange={handleChange}
+            required
+          />
+        </label>
+
+        <label>
+          Días de préstamo
+          <input
+            type='number'
+            name='dias_prestamo'
+            min='1'
+            value={formData.dias_prestamo}
             onChange={handleChange}
             required
           />

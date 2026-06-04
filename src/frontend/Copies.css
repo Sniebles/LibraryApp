@@ -11,6 +11,9 @@
     position: absolute;
     bottom: 0;
     right: 0;
+    display: flex;
+    justify-content: end;
+    gap: 5px;
 }
 
 .book_copy_text p {
@@ -53,4 +56,18 @@
 .book_copy_barcode {
     height: 100%;
     width: auto;
+}
+
+.non-clickable {
+    cursor: auto;
+    background-color: var(--unavailable-color);
+}
+
+.non-clickable:hover {
+    transform: none;
+}
+
+.non-clickable:active {
+    background-color: var(--unavailable-color);
+    color: var(--text-color);
 }

@@ -37,7 +37,7 @@
     display: grid;
     gap: 0.45rem;
     font-size: 0.95rem;
-    color: #333;
+    color: var(--text-color);
 }
 
 .userreg_form input,
@@ -47,7 +47,7 @@
     border: 0.15rem solid rgba(0, 0, 0, 0.12);
     border-radius: 0.85rem;
     background: #fff;
-    color: #111;
+    color: var(--text-color);
     font-size: 1rem;
     outline: none;
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
@@ -76,6 +76,7 @@
 .userreg_submit:hover {
     background: var(--highlight-color);
     transform: translateY(-1px);
+    color: var(--text-color-secondary);
 }
 
 @keyframes userregFadeIn {

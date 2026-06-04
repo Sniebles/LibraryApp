@@ -2,7 +2,7 @@ import Barcode from "react-barcode"
 import Box from "./Box"
 import "./Copies.css"
 
-function Copies({copies, loadCopies, user, handleBorrow, handleEdit, handleDelete}) {
+function Copies({copies, loadCopies, user, handleBorrow, handleEdit, handleDelete, handleReserve, addPopup}) {
 
     const handleLost = async (copy) => {
         
@@ -25,7 +25,7 @@ function Copies({copies, loadCopies, user, handleBorrow, handleEdit, handleDelet
             console.log(data.message);
 
         } catch (error) {
-            alert('Error marking copy as lost: ' + error.message);
+            addPopup('Error marking copy as lost: ' + error.message);
             console.error('Error marking copy as lost:', error);
         }
     };
@@ -37,26 +37,32 @@ function Copies({copies, loadCopies, user, handleBorrow, handleEdit, handleDelet
             <Box clickable={false} className='book_copy' key={index}>
                 <Barcode className='book_copy_barcode' value={copy.codigo_barras} />
                 <div className='book_copy_right'>
-                <div className='book_copy_text'>
-                    <p>ubicasion: {copy.ubicacion}</p>
-                    <p>estado: {copy.estado}</p>
+                    <div className='book_copy_text'>
+                        <p>ubicasion: {copy.ubicacion}</p>
+                        <p>estado: {copy.estado}</p>
+                    </div>
+                    {!user ?
+                    <div className='book_borrow_btn book_copies_btns'>
+                        <button onClick={() => handleEdit(copy)} className='r_button'>Editar</button>
+                        <button onClick={() => handleLost(copy)} className='book_copies_lost_btn r_button'>perdido</button>
+                        <button onClick={() => handleDelete(copy.id_ejemplar)} className='book_copies_delete_btn r_button'>Borrar</button>
+                    </div>:
+                        <div className="book_borrow_btn">
+                            <button onClick={() => handleReserve(copy)} className='r_button'>Reservar</button>
+                            {user.estado === 'activo' || !user.id_usuario ?
+                            user.id_usuario ? (
+                                copy.estado === 'disponible' ?
+                                    <button onClick={() => handleBorrow(copy.id_ejemplar)} className='r_button'>Prestar</button>
+                                    :
+                                    <button className='r_button non-clickable'>Prestar</button>
+                            ) : (
+                                <h3>Por favor, inicie sesión para prestar este libro.</h3>
+                            ) : (
+                                <h3>No puedes prestar este libro. Por favor, contacta con la biblioteca.</h3>
+                            )}
+                        </div>
+                    }
                 </div>
-                {!user ?
-                <div className='book_borrow_btn book_copies_btns'>
-                    <button onClick={() => handleEdit(copy)} className='r_button'>Editar</button>
-                    <button onClick={() => handleLost(copy)} className='book_copies_lost_btn r_button'>perdido</button>
-                    <button onClick={() => handleDelete(copy.id_ejemplar)} className='book_copies_delete_btn r_button'>Borrar</button>
-                </div>:
-                copy.estado === 'disponible' && (
-                user.estado === 'activo' || !user.id_usuario ?
-                user.id_usuario ? (
-                    <button onClick={() => handleBorrow(copy.id_ejemplar)} className='book_borrow_btn r_button'>Prestar</button>
-                ) : (
-                    <h3>Por favor, inicie sesión para prestar este libro.</h3>
-                ) : (
-                    <h3>No puedes prestar este libro. Por favor, contacta con la biblioteca.</h3>
-                )
-                )}</div>
             </Box>
             ))}
         </div>

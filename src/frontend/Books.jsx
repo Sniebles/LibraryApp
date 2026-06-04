@@ -14,6 +14,7 @@ function Books({close, user, addPopup}) {
         const book = books[index - 1]
         addPopup(
             <Book
+                addPopup={addPopup}
                 loadBooks={loadBooks}
                 key={index}
                 user={user}
@@ -26,6 +27,7 @@ function Books({close, user, addPopup}) {
                 autores={book.autores}
                 categorias={book.categorias}
                 disponibilidad={book.disponibilidad}
+                dias_prestamo={book.dias_prestamo}
                 setBook={setBook} />,
             '30rem', '70%'
         )
@@ -118,6 +120,7 @@ function Books({close, user, addPopup}) {
                             <p>{book.descripcion}</p>
                             <p>{book.autores}</p>
                             <p>{book.categorias}</p>
+                            <p>dias de prestamo: {book.dias_prestamo} dias</p>
                             {book.disponibilidad !== "disponible" &&
                             <div className="unavailable_note">
                                 <h2>No disponible</h2>

@@ -65,6 +65,8 @@
 
 .r_button:hover {
     transform: scale(110%);
+    background: var(--highlight-color);
+    color: var(--text-color-secondary) !important;
 }
 .r_button:active {
     background: var(--highlight-color);
